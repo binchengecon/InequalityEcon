@@ -240,7 +240,7 @@ def control_c(V):
     V_a = tf.gradients(V, a_interior_tnsr)[0]
     V_aa = tf.gradients(V_a, a_interior_tnsr)[0]
     
-    c = tf.where(V_a <= 0, tf.zeros((nSim_interior, 1)), u_deriv_inv(V_a))
+    c = tf.where(V_a <= 0, tf.zeros(tf.shape(V)), u_deriv_inv(V_a))
     
     return c
 
@@ -311,7 +311,7 @@ fitted_c = sess.run([numerical_c], feed_dict={a_interior_tnsr: Xgrid[:,0:1], z_i
 
 fig = plt.figure(figsize=(9, 6))
 ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(A, Z, fitted_V, cmap='viridis')
+ax.plot_surface(A, Z, fitted_V.reshape(n_plot+1, n_plot+1), cmap='viridis')
 # ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
@@ -327,11 +327,11 @@ if saveFigure:
 # # Surface plot of solution u(t,x)
 fig = plt.figure(figsize=(9, 6))
 ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(A, Z, fitted_c, cmap='viridis')
+ax.plot_surface(A, Z, fitted_c.reshape(n_plot+1, n_plot+1), cmap='viridis')
 ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
-ax.set_zlabel('$\partial v \partial a (a,z)$')
+ax.set_zlabel('$c (a,z)$')
 ax.set_title('Deep Learning Solution')
 
 
