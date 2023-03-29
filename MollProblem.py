@@ -320,7 +320,7 @@ ax.plot_surface(A, Z, fitted_c.reshape(n_plot+1, n_plot+1), cmap='viridis')
 ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
-ax.set_zlabel('$\partial v \partial a (a,z)$')
+ax.set_zlabel('$c(a,z)$')
 ax.set_title('Deep Learning Solution')
 
 
