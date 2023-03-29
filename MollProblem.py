@@ -227,7 +227,7 @@ def control_c(V):
     V_a = tf.gradients(V, a_interior_tnsr)[0]
     V_aa = tf.gradients(V_a, a_interior_tnsr)[0]
     
-    c = tf.where(V_a <= 0, tf.zeros((nSim_interior, 1)), u_deriv_inv(V_a))
+    c = tf.where(V_a <= 0, tf.zeros(tf.shape(V)), u_deriv_inv(V_a))
     
     return c
 
@@ -287,20 +287,22 @@ plt.figure(figsize = (12,10))
 X_plot = np.linspace(X_low, X_high, n_plot)
 X_plot = X_plot.reshape(-1,1)
 
-aspace = np.linspace(-0.02, 4, N+1)
-zspace = np.linspace(zmean*0.8, zmean*1.2, N+1)
+aspace = np.linspace(-0.02, 4, n_plot+1)
+zspace = np.linspace(zmean*0.8, zmean*1.2, n_plot+1)
 A, Z = np.meshgrid(aspace, zspace)
 Xgrid = np.vstack([A.flatten(), Z.flatten()]).T
 
 # simulate process at current t 
 
 fitted_V = sess.run([V], feed_dict={
-                    a_interior_tnsr: A.flatten().T, a_interior_tnsr: Z.flatten().T})[0]
-fitted_c = sess.run([numerical_c], feed_dict={a_interior_tnsr: A.flatten().T, a_interior_tnsr: Z.flatten().T})[0]
+                    a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
+fitted_c = sess.run([numerical_c], feed_dict={
+                    a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
+
 
 fig = plt.figure(figsize=(9, 6))
 ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(A, Z, fitted_V, cmap='viridis')
+ax.plot_surface(A, Z, fitted_V.reshape(n_plot+1, n_plot+1), cmap='viridis')
 # ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
@@ -314,7 +316,7 @@ if saveFigure:
 # # Surface plot of solution u(t,x)
 fig = plt.figure(figsize=(9, 6))
 ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(A, Z, fitted_c, cmap='viridis')
+ax.plot_surface(A, Z, fitted_c.reshape(n_plot+1, n_plot+1), cmap='viridis')
 ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
