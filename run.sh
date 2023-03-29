@@ -8,7 +8,7 @@ python_name="MollProblem_mercury.py" # 3 dmg
 num_layers_arr=(3 4 5 6)
 nodes_per_layer_arr=(20 30 40 50 60)
 
-sampling_stages_arr=(50000)
+sampling_stages_arr=(10)
 steps_per_sample_arr=(100)
 
 nSim_interior_arr=(1024)
@@ -44,7 +44,7 @@ for num_layers in ${num_layers_arr[@]}; do
 #! /bin/bash
 
 ######## login
-#SBATCH --job-name=num_layers_${num_layers}_nodes_per_layer_${nodes_per_layer}_num_layers_${num_layers}_steps_per_sample_{steps_per_sample}_nSim_interior_{nSim_interior}_nSim_boundary_${nSim_boundary}
+#SBATCH --job-name=num_layers_${num_layers}_nodes_per_layer_${nodes_per_layer}_sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}_nSim_interior_{nSim_interior}_nSim_boundary_${nSim_boundary}
 #SBATCH --output=./job-outs/${action_name}/train.out
 #SBATCH --error=./job-outs/${action_name}/train.err
 
@@ -64,7 +64,7 @@ echo "Program starts \$(date)"
 start_time=\$(date +%s)
 # perform a task
 
-python3 -u  /home/bcheng4/InequalityEcon/$python_name --num_layers ${num_layers} --nodes_per_layer ${nodes_per_layer}  --num_layers ${num_layers} --steps_per_sample ${steps_per_sample} --nSim_interior ${nSim_interior} --nSim_boundary  ${nSim_boundary} 
+python3 -u  /home/bcheng4/InequalityEcon/$python_name --num_layers ${num_layers} --nodes_per_layer ${nodes_per_layer}  --sampling_stages ${sampling_stages} --steps_per_sample ${steps_per_sample} --nSim_interior ${nSim_interior} --nSim_boundary  ${nSim_boundary} 
 
 echo "Program ends \$(date)"
 end_time=\$(date +%s)
