@@ -1,0 +1,86 @@
+#! /bin/bash
+
+
+python_name="MollProblem_mercury.py" # 3 dmg
+
+
+
+num_layers_arr=(3 4 5 6)
+nodes_per_layer_arr=(20 30 40 50 60)
+
+sampling_stages_arr=(50000)
+steps_per_sample_arr=(100)
+
+nSim_interior_arr=(1024)
+nSim_boundary_arr=(128)
+
+LENGTH_layers=$((${#num_layers_arr[@]} - 1))
+LENGTH_nodes=$((${#nodes_per_layer_arr[@]} - 1))
+
+
+count=0
+
+for num_layers in ${num_layers_arr[@]}; do
+	for nodes_per_layer in ${nodes_per_layer_arr[@]}; do
+        for sampling_stages in ${sampling_stages_arr[@]}; do
+            for steps_per_sample in ${steps_per_sample_arr[@]}; do
+                for nSim_interior in ${nSim_interior_arr[@]}; do  
+                    for nSim_boundary in ${nSim_boundary_arr[@]}; do
+
+                        action_name="num_layers_${num_layers}_nodes_per_layer_${nodes_per_layer}_sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}_nSim_interior_${nSim_interior}_nSim_boundary_${nSim_boundary}"
+
+
+                        mkdir -p ./job-outs/${action_name}/
+
+                        if [ -f ./bash/${action_name}/train.sh ]; then
+                            rm ./bash/${action_name}/train.sh
+                        fi
+
+                        mkdir -p ./bash/${action_name}/
+
+                        touch ./bash/${action_name}/train.sh
+
+                        tee -a ./bash/${action_name}/train.sh <<EOF
+#! /bin/bash
+
+######## login
+#SBATCH --job-name=num_layers_${num_layers}_nodes_per_layer_${nodes_per_layer}_num_layers_${num_layers}_steps_per_sample_{steps_per_sample}_nSim_interior_{nSim_interior}_nSim_boundary_${nSim_boundary}
+#SBATCH --output=./job-outs/${action_name}/train.out
+#SBATCH --error=./job-outs/${action_name}/train.err
+
+#SBATCH --account=pi-lhansen
+#SBATCH --partition=standard
+#SBATCH --cpus-per-task=5
+#SBATCH --mem=3G
+#SBATCH --time=7-00:00:00
+#SBATCH --exclude=mcn53,mcn51,mcn05
+
+####### load modules
+module load python/booth/3.8  gcc/9.2.0
+
+echo "\$SLURM_JOB_NAME"
+
+echo "Program starts \$(date)"
+start_time=\$(date +%s)
+# perform a task
+
+python3 -u  /home/bcheng4/InequalityEcon/$python_name --num_layers ${num_layers} --nodes_per_layer ${nodes_per_layer}  --num_layers ${num_layers} --steps_per_sample ${steps_per_sample} --nSim_interior ${nSim_interior} --nSim_boundary  ${nSim_boundary} 
+
+echo "Program ends \$(date)"
+end_time=\$(date +%s)
+
+# elapsed time with second resolution
+elapsed=\$((end_time - start_time))
+
+eval "echo Elapsed time: \$(date -ud "@\$elapsed" +'\$((%s/3600/24)) days %H hr %M min %S sec')"
+# echo ${hXarr[@]}
+
+EOF
+						count=$(($count + 1))
+						sbatch ./bash/${action_name}/train.sh
+					done
+				done
+			done
+		done
+	done
+done
