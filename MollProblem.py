@@ -31,7 +31,7 @@ starting_learning_rate = 0.001
 
 # Training parameters
 sampling_stages  = 20000   # number of times to resample new time-space domain points
-steps_per_sample = 5    # number of SGD steps to take before re-sampling
+steps_per_sample = 32    # number of SGD steps to take before re-sampling
 
 # Sampling parameters
 nSim_interior = 512
@@ -86,8 +86,8 @@ def sampler(nSim_interior, nSim_boundary):
     # t_interior = np.random.uniform(low=t_low - 0.5*(T-t_low), high=T, size=[nSim_interior, 1])
 #    t_interior = np.random.uniform(low=t_low - t_oversample, high=T, size=[nSim_interior, 1])
     # X_interior = np.random.uniform(low=X_low - 0.5*(X_high-X_low), high=X_high + 0.5*(X_high-X_low), size=[nSim_interior, 1])
-    a_interior = np.random.uniform(low=X_low[0], high=X_high[0], size=[nSim_interior, 1])
-    z_interior = np.random.uniform(low=X_low[1], high=X_high[1], size=[nSim_interior, 1])
+    a_interior = np.random.uniform(low=X_low[0]-0.01, high=X_high[0]+0.1, size=[nSim_interior, 1])
+    z_interior = np.random.uniform(low=X_low[1]-0.1, high=X_high[1]+0.1, size=[nSim_interior, 1])
 #    X_interior = np.random.uniform(low=X_low - X_oversample, high=X_high + X_oversample, size=[nSim_interior, 1])
 #    X_interior = np.random.uniform(low=X_low * X_multiplier_low, high=X_high * X_multiplier_high, size=[nSim_interior, 1])
 
@@ -221,6 +221,9 @@ loss_tnsr = L1_tnsr + L2_tnsr + L3_tnsr
 
 V = model(tf.stack([a_interior_tnsr[:, 0], z_interior_tnsr[:, 0]], axis=1))
 
+V_a = tf.gradients(V, a_interior_tnsr)[0]
+V_aa = tf.gradients(V_a, a_interior_tnsr)[0]
+
 # optimal control computed numerically from fitted value function 
 def control_c(V):
     
@@ -234,6 +237,7 @@ def control_c(V):
 
 
 numerical_c = control_c(V)
+
 
 # set optimizer - NOTE THIS IS DIFFERENT FROM OTHER APPLICATIONS!
 global_step = tf.Variable(0, trainable=False)
@@ -273,8 +277,8 @@ if saveOutput:
 #%% Plot value function results
 
 # LaTeX rendering for text in plots
-plt.rc('text', usetex=True)
-plt.rc('font', family='serif')
+# plt.rc('text', usetex=True)
+# plt.rc('font', family='serif')
 
 figwidth = 10
 
@@ -283,9 +287,6 @@ plt.figure()
 plt.figure(figsize = (12,10))
 
 
-# vector of t and S values for plotting
-X_plot = np.linspace(X_low, X_high, n_plot)
-X_plot = X_plot.reshape(-1,1)
 
 aspace = np.linspace(-0.02, 4, n_plot+1)
 zspace = np.linspace(zmean*0.8, zmean*1.2, n_plot+1)
@@ -298,6 +299,50 @@ fitted_V = sess.run([V], feed_dict={
                     a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
 fitted_c = sess.run([numerical_c], feed_dict={
                     a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
+fitted_Va = sess.run([V_a], feed_dict={
+                    a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
+fitted_Vaa = sess.run([V_aa], feed_dict={
+                    a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
+
+
+fig = plt.figure(figsize=(9*4, 6*4))
+ax = fig.add_subplot(2,2,1, projection='3d')
+ax.plot_surface(A, Z, fitted_V.reshape(n_plot+1, n_plot+1), cmap='viridis')
+# ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+ax.set_title('Value Function')
+
+# fig = plt.figure(figsize=(9, 6))
+ax = fig.add_subplot(2,2,2, projection='3d')
+ax.plot_surface(A, Z, fitted_c.reshape(n_plot+1, n_plot+1), cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+ax.set_title('Consumption')
+# ax.set_title('Deep Learning Solution')
+
+# # Surface plot of solution u(t,x)
+# fig = plt.figure(figsize=(9, 6))
+ax = fig.add_subplot(2,2,3, projection='3d')
+ax.plot_surface(A, Z, fitted_Va.reshape(n_plot+1, n_plot+1), cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+ax.set_title('$\partial V / \partial a$')
+# ax.set_title('Deep Learning Solution')
+
+# # Surface plot of solution u(t,x)
+# fig = plt.figure(figsize=(9, 6))
+ax = fig.add_subplot(2,2,4, projection='3d')
+ax.plot_surface(A, Z, fitted_Vaa.reshape(n_plot+1, n_plot+1), cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+# ax.set_zlabel('$V_aa$')
+ax.set_title('$\partial^2 V / \partial a^2$')
+
+plt.savefig(figureName + '_All.pdf')
 
 
 fig = plt.figure(figsize=(9, 6))
@@ -306,22 +351,41 @@ ax.plot_surface(A, Z, fitted_V.reshape(n_plot+1, n_plot+1), cmap='viridis')
 # ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
-ax.set_zlabel('$v(a,z)$')
-ax.set_title('Deep Learning Solution')
+ax.set_title('Value Function')
 
+plt.savefig(figureName + '_Value.pdf')
 
-if saveFigure:
-    plt.savefig(figureName + '_Value.pdf')
-
-# # Surface plot of solution u(t,x)
 fig = plt.figure(figsize=(9, 6))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(A, Z, fitted_c.reshape(n_plot+1, n_plot+1), cmap='viridis')
 ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
-ax.set_zlabel('$c(a,z)$')
-ax.set_title('Deep Learning Solution')
+ax.set_title('Consumption')
+# ax.set_title('Deep Learning Solution')
+plt.savefig(figureName + '_Consumption.pdf')
+
+# # Surface plot of solution u(t,x)
+fig = plt.figure(figsize=(9, 6))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, fitted_Va.reshape(n_plot+1, n_plot+1), cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+ax.set_title('$\partial V / \partial a$')
+# ax.set_title('Deep Learning Solution')
+plt.savefig(figureName + '_Va.pdf')
+
+# # Surface plot of solution u(t,x)
+fig = plt.figure(figsize=(9, 6))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, fitted_Vaa.reshape(n_plot+1, n_plot+1), cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+# ax.set_zlabel('$V_aa$')
+ax.set_title('$\partial^2 V / \partial a^2$')
+plt.savefig(figureName + '_Vaa.pdf')
 
 
 
