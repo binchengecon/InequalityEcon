@@ -61,7 +61,7 @@ n_plot = 600  # Points on plot grid for each dimension
 
 # Save options
 saveOutput = False
-savefolder = 'num_layers_{}_nodes_per_layer_{}_sampling_stages_{}_steps_per_sample_{}_nSim_interior_{}_nSim_boundary_{}'.format(num_layers, nodes_per_layer, sampling_stages, steps_per_sample, nSim_interior, nSim_boundary)
+savefolder = 'num_layers_FFNN_{}_num_layers_RNN_{}_nodes_per_layer_{}_sampling_stages_{}_steps_per_sample_{}_nSim_interior_{}_nSim_boundary_{}'.format(num_layers_FFNN, num_layers_RNN, nodes_per_layer, sampling_stages, steps_per_sample, nSim_interior, nSim_boundary)
 saveName   = 'MollProblem' 
 saveFigure = True
 figureName = 'MollProblem' 
