@@ -180,10 +180,13 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
 
     fitted_boundary_SC_lower_a = tf.gradients(
         fitted_boundary_SC_lower, a_SC_lower)[0]
-    opt_boundary_SC_lower_a = tf.minimum(fitted_boundary_SC_lower_a - u_deriv(
-        z_SC_lower+r*a_SC_lower), tf.zeros_like(fitted_boundary_SC_lower))
+    # opt_boundary_SC_lower_a = tf.minimum(fitted_boundary_SC_lower_a - u_deriv(
+    #     z_SC_lower+r*a_SC_lower), tf.zeros_like(fitted_boundary_SC_lower))
     
-    L3_lower = tf.reduce_mean(tf.square(opt_boundary_SC_lower_a))
+    # L3_lower = tf.reduce_mean(tf.square(opt_boundary_SC_lower_a))
+    
+    L3_lower = tf.reduce_mean(tf.square(fitted_boundary_SC_lower_a - u_deriv(z_SC_lower+r*a_SC_lower))) 
+    
     
     fitted_boundary_SC_upper = model(
         tf.stack([a_SC_upper[:, 0], z_SC_upper[:, 0]], axis=1))

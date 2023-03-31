@@ -113,11 +113,11 @@ def sampler(nSim_interior, nSim_boundary):
         low=X_low[0], high=X_high[0], size=[nSim_boundary, 1])
     z_NBC = X_low[1] + (X_high[1] - X_low[1]) * np.random.binomial(1, 0.5, size = (nSim_boundary,1))
 
-    a_SC_upper = X_high[1] * np.ones((nSim_boundary,1))
+    a_SC_upper = X_high[0] * np.ones((nSim_boundary,1))
     z_SC_upper = np.random.uniform(
         low=X_low[1], high=X_high[1], size=[nSim_boundary, 1])
 
-    a_SC_lower = X_high[0] * np.ones((nSim_boundary, 1))
+    a_SC_lower = X_low[0] * np.ones((nSim_boundary, 1))
     z_SC_lower = np.random.uniform(
         low=X_low[1], high=X_high[1], size=[nSim_boundary, 1])
 

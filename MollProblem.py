@@ -25,8 +25,8 @@ X_low = np.array([-0.02, zmean*0.8])  # wealth lower bound
 X_high = np.array([4, zmean*1.2])          # wealth upper bound
 
 # neural network parameters
-num_layers = 4
-nodes_per_layer = 40
+num_layers = 3
+nodes_per_layer = 50
 starting_learning_rate = 0.001
 
 # # Training parameters
@@ -105,11 +105,11 @@ def sampler(nSim_interior, nSim_boundary):
         low=X_low[0], high=X_high[0], size=[nSim_boundary, 1])
     z_NBC = X_low[1] + (X_high[1] - X_low[1]) * np.random.binomial(1, 0.5, size = (nSim_boundary,1))
 
-    a_SC_upper = X_high[1] * np.ones((nSim_boundary,1))
+    a_SC_upper = X_high[0] * np.ones((nSim_boundary,1))
     z_SC_upper = np.random.uniform(
         low=X_low[1], high=X_high[1], size=[nSim_boundary, 1])
 
-    a_SC_lower = X_high[0] * np.ones((nSim_boundary, 1))
+    a_SC_lower = X_low[0] * np.ones((nSim_boundary, 1))
     z_SC_lower = np.random.uniform(
         low=X_low[1], high=X_high[1], size=[nSim_boundary, 1])
 
@@ -157,9 +157,10 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     diff_V = -rho*V + u_c + V_a * \
         (z_interior+r*a_interior-c)+(-the*tf.math.log(z_interior)+sig2/2)*z_interior*V_z + sig2*z_interior**2/2*V_zz
 
-    concave_V = tf.maximum(V_aa, tf.zeros_like(V))
-    # compute average L2-norm of differential operator
-    L1 = tf.reduce_mean(tf.square(diff_V))  + tf.reduce_mean(tf.square(concave_V))
+    # concave_V = tf.maximum(V_aa, tf.zeros_like(V))
+    # L1 = tf.reduce_mean(tf.square(diff_V))  + tf.reduce_mean(tf.square(concave_V))
+    
+    L1 = tf.reduce_mean(tf.square(diff_V)) 
     
     # Loss term #2: boundary condition
         # no boundary condition for this problem
@@ -179,10 +180,12 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
 
     fitted_boundary_SC_lower_a = tf.gradients(
         fitted_boundary_SC_lower, a_SC_lower)[0]
-    opt_boundary_SC_lower_a = tf.minimum(fitted_boundary_SC_lower_a - u_deriv(
-        z_SC_lower+r*a_SC_lower), tf.zeros_like(fitted_boundary_SC_lower))
+    # opt_boundary_SC_lower_a = tf.minimum(fitted_boundary_SC_lower_a - u_deriv(
+    #     z_SC_lower+r*a_SC_lower), tf.zeros_like(fitted_boundary_SC_lower))
     
-    L3_lower = tf.reduce_mean(tf.square(opt_boundary_SC_lower_a))
+    # L3_lower = tf.reduce_mean(tf.square(opt_boundary_SC_lower_a))
+    
+    L3_lower = tf.reduce_mean(tf.square(fitted_boundary_SC_lower_a - u_deriv(z_SC_lower+r*a_SC_lower))) 
     
     fitted_boundary_SC_upper = model(
         tf.stack([a_SC_upper[:, 0], z_SC_upper[:, 0]], axis=1))
