@@ -106,11 +106,11 @@ def sampler(nSim_interior, nSim_boundary):
         low=X_low[0], high=X_high[0], size=[nSim_boundary, 1])
     z_NBC = X_low[1] + (X_high[1] - X_low[1]) * np.random.binomial(1, 0.5, size = (nSim_boundary,1))
 
-    a_SC_upper = X_high[1] * np.ones((nSim_boundary,1))
+    a_SC_upper = X_high[0] * np.ones((nSim_boundary,1))
     z_SC_upper = np.random.uniform(
         low=X_low[1], high=X_high[1], size=[nSim_boundary, 1])
 
-    a_SC_lower = X_high[0] * np.ones((nSim_boundary, 1))
+    a_SC_lower = X_low[0] * np.ones((nSim_boundary, 1))
     z_SC_lower = np.random.uniform(
         low=X_low[1], high=X_high[1], size=[nSim_boundary, 1])
 
@@ -232,6 +232,7 @@ V = model(tf.stack([a_interior_tnsr[:, 0], z_interior_tnsr[:, 0]], axis=1))
 
 V_a = tf.gradients(V, a_interior_tnsr)[0]
 V_aa = tf.gradients(V_a, a_interior_tnsr)[0]
+V_z = tf.gradients(V, z_interior_tnsr)[0]
 
 # optimal control computed numerically from fitted value function 
 def control_c(V):
@@ -312,7 +313,8 @@ fitted_Va = sess.run([V_a], feed_dict={
                     a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
 fitted_Vaa = sess.run([V_aa], feed_dict={
                     a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
-
+fitted_Vz = sess.run([V_z], feed_dict={
+                    a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
 
 # fig = plt.figure(figsize=(9*4, 6*4))
 # ax = fig.add_subplot(2,2,1, projection='3d')
@@ -396,6 +398,16 @@ ax.set_ylabel('$z$')
 ax.set_title('$\partial^2 V / \partial a^2$')
 # plt.savefig(figureName + '_Vaa.pdf')
 
+# # Surface plot of solution u(t,x)
+fig = plt.figure(figsize=(16, 9))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, fitted_Vz.reshape(n_plot+1, n_plot+1), cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+ax.set_title('$\partial V / \partial z$')
+# ax.set_title('Deep Learning Solution')
+# plt.savefig(figureName + '_Vz.pdf')
 
 
 if saveFigure:
