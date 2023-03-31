@@ -13,12 +13,13 @@ import os
 
 
 parser = argparse.ArgumentParser(description="xi_r values")
-parser.add_argument("--num_layers", type=int, default=1000.)
-parser.add_argument("--nodes_per_layer", type=int, default=1000.)
-parser.add_argument("--sampling_stages", type=int, default=0)
-parser.add_argument("--steps_per_sample", type=int, default=0.003)
-parser.add_argument("--nSim_interior", type=int, default=0.5)
-parser.add_argument("--nSim_boundary", type=int, default=0.5)
+parser.add_argument("--num_layers_FFNN", type=int)
+parser.add_argument("--num_layers_RNN", type=int)
+parser.add_argument("--nodes_per_layer", type=int)
+parser.add_argument("--sampling_stages", type=int)
+parser.add_argument("--steps_per_sample", type=int)
+parser.add_argument("--nSim_interior", type=int)
+parser.add_argument("--nSim_boundary", type=int)
 # args = parser.parse_args()
 args, unknown = parser.parse_known_args()
 
@@ -38,7 +39,8 @@ X_low = np.array([-0.02, zmean*0.8])  # wealth lower bound
 X_high = np.array([4, zmean*1.2])          # wealth upper bound
 
 # neural network parameters
-num_layers = args.num_layers
+num_layers_FFNN = args.num_layers_FFNN
+num_layers_RNN = args.num_layers_RNN
 nodes_per_layer = args.nodes_per_layer
 starting_learning_rate = 0.001
 
@@ -218,7 +220,7 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
 # Set up network
 
 # initialize DGM model (last input: space dimension = 1)
-model = DGM2.DGMNet(nodes_per_layer, num_layers, 2)
+model = DGM2.DCGMNet(X_low, X_high, nodes_per_layer, num_layers_FFNN,num_layers_RNN, 2)
 
 # tensor placeholders (_tnsr suffix indicates tensors)
 # inputs (time, space domain interior, space domain at initial time)
