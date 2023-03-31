@@ -157,8 +157,9 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     diff_V = -rho*V + u_c + V_a * \
         (z_interior+r*a_interior-c)+(-the*tf.math.log(z_interior)+sig2/2)*z_interior*V_z + sig2*z_interior**2/2*V_zz
 
+    concave_V = tf.maximum(V_aa, tf.zeros_like(V))
     # compute average L2-norm of differential operator
-    L1 = tf.reduce_mean(tf.square(diff_V)) 
+    L1 = tf.reduce_mean(tf.square(diff_V))  + tf.reduce_mean(tf.square(concave_V))
     
     # Loss term #2: boundary condition
         # no boundary condition for this problem
@@ -192,6 +193,7 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
         z_SC_upper+r*a_SC_upper), tf.zeros_like(fitted_boundary_SC_upper))
     
     L3_upper = tf.reduce_mean(tf.square(opt_boundary_SC_upper_a))
+    
     
     L3 = L3_lower + L3_upper
     # L3 = tf.reduce_mean(tf.zeros(tf.shape(a_SC_lower)))
