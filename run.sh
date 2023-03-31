@@ -5,14 +5,15 @@ python_name="MollProblem_mercury.py" # 3 dmg
 
 
 
-num_layers_arr=(3 4 5 6)
+num_layers_arr=(2 3 4 5 6)
 nodes_per_layer_arr=(20 30 40 50 60)
 
-sampling_stages_arr=(10)
-steps_per_sample_arr=(100)
+# sampling_stages_arr=(10 5)
+sampling_stages_arr=(20000 50000)
+steps_per_sample_arr=(10 5)
 
-nSim_interior_arr=(1024)
-nSim_boundary_arr=(128)
+nSim_interior_arr=(1024 2048)
+nSim_boundary_arr=(128 256)
 
 LENGTH_layers=$((${#num_layers_arr[@]} - 1))
 LENGTH_nodes=$((${#nodes_per_layer_arr[@]} - 1))
@@ -49,14 +50,14 @@ for num_layers in ${num_layers_arr[@]}; do
 #SBATCH --error=./job-outs/${action_name}/train.err
 
 #SBATCH --account=pi-lhansen
-#SBATCH --partition=standard
+#SBATCH --partition=caslake
 #SBATCH --cpus-per-task=5
-#SBATCH --mem=3G
-#SBATCH --time=7-00:00:00
-#SBATCH --exclude=mcn53,mcn51,mcn05
+#SBATCH --mem=5G
+#SBATCH --time=1-00:00:00
+##SBATCH --exclude=mcn53,mcn51,mcn05
 
 ####### load modules
-module load python/booth/3.8  gcc/9.2.0
+module load python/anaconda-2020.11 
 
 echo "\$SLURM_JOB_NAME"
 
@@ -64,7 +65,7 @@ echo "Program starts \$(date)"
 start_time=\$(date +%s)
 # perform a task
 
-python3 -u  /home/bcheng4/InequalityEcon/$python_name --num_layers ${num_layers} --nodes_per_layer ${nodes_per_layer}  --sampling_stages ${sampling_stages} --steps_per_sample ${steps_per_sample} --nSim_interior ${nSim_interior} --nSim_boundary  ${nSim_boundary} 
+python3 -u  /home/bincheng/InequalityEcon/$python_name --num_layers ${num_layers} --nodes_per_layer ${nodes_per_layer}  --sampling_stages ${sampling_stages} --steps_per_sample ${steps_per_sample} --nSim_interior ${nSim_interior} --nSim_boundary  ${nSim_boundary} 
 
 echo "Program ends \$(date)"
 end_time=\$(date +%s)

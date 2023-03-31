@@ -59,9 +59,10 @@ n_plot = 600  # Points on plot grid for each dimension
 
 # Save options
 saveOutput = False
-saveName   = 'MollProblem_' + 'num_layers_{}_nodes_per_layer_{}_sampling_stages_{}_steps_per_sample_{}_nSim_interior_{}_nSim_boundary_{}'.format(num_layers, nodes_per_layer, sampling_stages, steps_per_sample, nSim_interior, nSim_boundary)
+savefolder = 'num_layers_{}_nodes_per_layer_{}_sampling_stages_{}_steps_per_sample_{}_nSim_interior_{}_nSim_boundary_{}'.format(num_layers, nodes_per_layer, sampling_stages, steps_per_sample, nSim_interior, nSim_boundary)
+saveName   = 'MollProblem' 
 saveFigure = True
-figureName = 'MollProblem_' + 'num_layers_{}_nodes_per_layer_{}_sampling_stages_{}_steps_per_sample_{}_nSim_interior_{}_nSim_boundary_{}'.format(num_layers, nodes_per_layer, sampling_stages, steps_per_sample, nSim_interior, nSim_boundary)
+figureName = 'MollProblem' 
 
 # Analytical Solution
 
@@ -159,10 +160,12 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     u_c = u(c)
     
     diff_V = -rho*V+u_c+V_a * \
-        (z_interior+r*a_interior-c)+(-the*tf.math.log(z_interior)+sig2/2)*V_z + sig2*z_interior**2/2*V_zz
+        (z_interior+r*a_interior-c)+(-the*tf.math.log(z_interior)+sig2/2)*z_interior*V_z + sig2*z_interior**2/2*V_zz
 
+    concave_V = tf.maximum(V_aa, tf.zeros_like(V))
     # compute average L2-norm of differential operator
-    L1 = tf.reduce_mean(tf.square(diff_V)) 
+    L1 = tf.reduce_mean(tf.square(diff_V))  + tf.reduce_mean(tf.square(concave_V))
+    
     
     # Loss term #2: boundary condition
         # no boundary condition for this problem
@@ -185,7 +188,7 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     # fitted_boundary_SC_lower = model(a_SC_lower[:,0], z_SC_lower[:,0])
     fitted_boundary_SC_lower_a = tf.gradients(
         fitted_boundary_SC_lower, a_SC_lower)[0]
-    opt_boundary_SC_lower_a = tf.maximum(fitted_boundary_SC_lower_a - u_deriv(
+    opt_boundary_SC_lower_a = tf.minimum(fitted_boundary_SC_lower_a - u_deriv(
         z_SC_lower+r*a_SC_lower), tf.zeros_like(fitted_boundary_SC_lower))
     
     L3_lower = tf.reduce_mean(tf.square(opt_boundary_SC_lower_a))
@@ -196,7 +199,7 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     # fitted_boundary_SC_upper = model(a_SC_upper, z_SC_upper)
     fitted_boundary_SC_upper_a = tf.gradients(
         fitted_boundary_SC_upper, a_SC_upper)[0]
-    opt_boundary_SC_upper_a = tf.minimum(fitted_boundary_SC_upper_a - u_deriv(
+    opt_boundary_SC_upper_a = tf.maximum(fitted_boundary_SC_upper_a - u_deriv(
         z_SC_upper+r*a_SC_upper), tf.zeros_like(fitted_boundary_SC_upper))
     
     L3_upper = tf.reduce_mean(tf.square(opt_boundary_SC_upper_a))
@@ -233,6 +236,9 @@ loss_tnsr = L1_tnsr + L2_tnsr + L3_tnsr
 # value function
 
 V = model(tf.stack([a_interior_tnsr[:, 0], z_interior_tnsr[:, 0]], axis=1))
+
+V_a = tf.gradients(V, a_interior_tnsr)[0]
+V_aa = tf.gradients(V_a, a_interior_tnsr)[0]
 
 # optimal control computed numerically from fitted value function 
 def control_c(V):
@@ -279,15 +285,19 @@ for i in range(sampling_stages):
     print(loss, L1, L2, L3, i)
 
 # save outout
-if saveOutput:
-    saver = tf.train.Saver()
-    saver.save(sess, './SavedNets/' + saveName)
+
+os.makedirs('./SavedNets/' +savefolder+ '/', exist_ok=True)
+# if saveOutput:
+saver = tf.train.Saver()
+saver.save(sess, './SavedNets/' +savefolder+ '/' + saveName)
        
 # Plot value function results
 
+os.makedirs('./Figure/'+savefolder+'/',exist_ok=True)
+
 # LaTeX rendering for text in plots
-plt.rc('text', usetex=True)
-plt.rc('font', family='serif')
+# plt.rc('text', usetex=True)
+# plt.rc('font', family='serif')
 
 figwidth = 10
 
@@ -308,6 +318,10 @@ Xgrid = np.vstack([A.flatten(), Z.flatten()]).T
 fitted_V = sess.run([V], feed_dict={
                     a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
 fitted_c = sess.run([numerical_c], feed_dict={a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
+fitted_Va = sess.run([V_a], feed_dict={
+                    a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
+fitted_Vaa = sess.run([V_aa], feed_dict={
+                    a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
 
 fig = plt.figure(figsize=(9, 6))
 ax = fig.add_subplot(111, projection='3d')
@@ -318,11 +332,7 @@ ax.set_ylabel('$z$')
 ax.set_zlabel('$v(a,z)$')
 ax.set_title('Deep Learning Solution')
 
-
-os.makedirs('./Figure/'+figureName+'/',exist_ok=True)
-
-if saveFigure:
-    plt.savefig( './Figure/' +figureName + '/Value.pdf')
+plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Value')
 
 # # Surface plot of solution u(t,x)
 fig = plt.figure(figsize=(9, 6))
@@ -335,9 +345,30 @@ ax.set_zlabel('$c (a,z)$')
 ax.set_title('Deep Learning Solution')
 
 
+plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Consumption')
 
-if saveFigure:
-    plt.savefig( './Figure/' +figureName + '/Consumption.pdf')
+
+# # Surface plot of solution u(t,x)
+fig = plt.figure(figsize=(16, 9))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, fitted_Va.reshape(n_plot+1, n_plot+1), cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+ax.set_title('$\partial V / \partial a$')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Va')
+
+# # Surface plot of solution u(t,x)
+fig = plt.figure(figsize=(16, 9))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, fitted_Vaa.reshape(n_plot+1, n_plot+1), cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+# ax.set_zlabel('$V_aa$')
+ax.set_title('$\partial^2 V / \partial a^2$')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vaa')
 
 
 
@@ -347,5 +378,5 @@ ax = fig.add_subplot(111)
 ax.semilogy(range(len(loss_list)), loss_list, 'k-')
 ax.set_xlabel('$n_{epoch}$')
 ax.set_ylabel('$\\phi^{n_{epoch}}$')
-if saveFigure:
-    plt.savefig( './Figure/' +figureName + '/LossList.pdf')
+# if saveFigure:
+plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Loss')
