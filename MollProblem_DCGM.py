@@ -25,14 +25,14 @@ X_low = np.array([-0.02, zmean*0.8])  # wealth lower bound
 X_high = np.array([4, zmean*1.2])          # wealth upper bound
 
 # neural network parameters
-num_layers_FFNN = 4
-num_layers_RNN = 2
-nodes_per_layer = 40
+num_layers_FFNN = 7
+num_layers_RNN = 1
+nodes_per_layer = 20
 starting_learning_rate = 0.001
 
 # # Training parameters
-sampling_stages  = 20000   # number of times to resample new time-space domain points
-steps_per_sample = 10    # number of SGD steps to take before re-sampling
+sampling_stages  = 2000   # number of times to resample new time-space domain points
+steps_per_sample = 1000    # number of SGD steps to take before re-sampling
 
 # Sampling parameters
 nSim_interior = 2000
@@ -276,7 +276,7 @@ for i in range(sampling_stages):
                                    feed_dict={a_interior_tnsr: a_interior, z_interior_tnsr: z_interior, a_NBC_tnsr: a_NBC, z_NBC_tnsr: z_NBC, a_SC_upper_tnsr: a_SC_upper, z_SC_upper_tnsr: z_SC_upper, a_SC_lower_tnsr: a_SC_lower, z_SC_lower_tnsr: z_SC_lower})
         loss_list.append(loss)
     
-    print(loss, L1, L2, L3, i)
+        print(loss, L1, L2, L3, i)
 
 # save outout
 if saveOutput:
@@ -362,7 +362,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 ax.set_title('Value Function')
 
-plt.savefig(figureName + '_Value.pdf')
+# plt.savefig(figureName + '_Value.pdf')
 
 fig = plt.figure(figsize=(16, 9))
 ax = fig.add_subplot(111, projection='3d')
@@ -372,7 +372,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 ax.set_title('Consumption')
 # ax.set_title('Deep Learning Solution')
-plt.savefig(figureName + '_Consumption.pdf')
+# plt.savefig(figureName + '_Consumption.pdf')
 
 # # Surface plot of solution u(t,x)
 fig = plt.figure(figsize=(16, 9))
@@ -383,7 +383,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 ax.set_title('$\partial V / \partial a$')
 # ax.set_title('Deep Learning Solution')
-plt.savefig(figureName + '_Va.pdf')
+# plt.savefig(figureName + '_Va.pdf')
 
 # # Surface plot of solution u(t,x)
 fig = plt.figure(figsize=(16, 9))
@@ -394,7 +394,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 # ax.set_zlabel('$V_aa$')
 ax.set_title('$\partial^2 V / \partial a^2$')
-plt.savefig(figureName + '_Vaa.pdf')
+# plt.savefig(figureName + '_Vaa.pdf')
 
 
 
