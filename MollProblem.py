@@ -25,17 +25,25 @@ X_low = np.array([-0.02, zmean*0.8])  # wealth lower bound
 X_high = np.array([4, zmean*1.2])          # wealth upper bound
 
 # neural network parameters
-num_layers = 3
-nodes_per_layer = 50
+num_layers = 4
+nodes_per_layer = 40
 starting_learning_rate = 0.001
 
-# Training parameters
+# # Training parameters
 sampling_stages  = 20000   # number of times to resample new time-space domain points
-steps_per_sample = 32    # number of SGD steps to take before re-sampling
+steps_per_sample = 10    # number of SGD steps to take before re-sampling
 
 # Sampling parameters
-nSim_interior = 512
-nSim_boundary = 64
+nSim_interior = 2000
+nSim_boundary = 100
+
+
+# sampling_stages  = 140000   # number of times to resample new time-space domain points
+# steps_per_sample = 1    # number of SGD steps to take before re-sampling
+
+# # Sampling parameters
+# nSim_interior = 1024
+# nSim_boundary = 128
 
 # multipliers for oversampling i.e. draw X from [X_low - X_oversample, X_high + X_oversample]
 X_oversample = 0.5
@@ -86,8 +94,8 @@ def sampler(nSim_interior, nSim_boundary):
     # t_interior = np.random.uniform(low=t_low - 0.5*(T-t_low), high=T, size=[nSim_interior, 1])
 #    t_interior = np.random.uniform(low=t_low - t_oversample, high=T, size=[nSim_interior, 1])
     # X_interior = np.random.uniform(low=X_low - 0.5*(X_high-X_low), high=X_high + 0.5*(X_high-X_low), size=[nSim_interior, 1])
-    a_interior = np.random.uniform(low=X_low[0]-0.01, high=X_high[0]+0.1, size=[nSim_interior, 1])
-    z_interior = np.random.uniform(low=X_low[1]-0.1, high=X_high[1]+0.1, size=[nSim_interior, 1])
+    a_interior = np.random.uniform(low=X_low[0], high=X_high[0], size=[nSim_interior, 1])
+    z_interior = np.random.uniform(low=X_low[1], high=X_high[1], size=[nSim_interior, 1])
 #    X_interior = np.random.uniform(low=X_low - X_oversample, high=X_high + X_oversample, size=[nSim_interior, 1])
 #    X_interior = np.random.uniform(low=X_low * X_multiplier_low, high=X_high * X_multiplier_high, size=[nSim_interior, 1])
 
@@ -141,12 +149,13 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     V_zz = tf.gradients(V_z, z_interior)[0]
      
      
-    c = tf.where(V_a <= 0, tf.zeros((nSim_interior,1)), u_deriv_inv(V_a))
+    # c = tf.where(V_a <= 0, tf.zeros(tf.shape(V)), u_deriv_inv(V_a))
+    c = u_deriv_inv(V_a)
 
     u_c = u(c)
     
-    diff_V = -rho*V+u_c+V_a * \
-        (z_interior+r*a_interior-c)+(-the*tf.math.log(z_interior)+sig2/2)*V_z + sig2*z_interior**2/2*V_zz
+    diff_V = -rho*V + u_c + V_a * \
+        (z_interior+r*a_interior-c)+(-the*tf.math.log(z_interior)+sig2/2)*z_interior*V_z + sig2*z_interior**2/2*V_zz
 
     # compute average L2-norm of differential operator
     L1 = tf.reduce_mean(tf.square(diff_V)) 
@@ -154,14 +163,12 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     # Loss term #2: boundary condition
         # no boundary condition for this problem
     fitted_boundary_NBC = model(tf.stack([a_NBC[:,0], z_NBC[:,0]], axis=1))
-    # fitted_boundary_NBC = model(a_NBC, z_NBC)
-    # fitted_boundary_NBC_a = tf.gradients(
-    #     fitted_boundary_NBC, X_boundary_NBC[:,0:1])[0]
 
     fitted_boundary_NBC_z = tf.gradients(
         fitted_boundary_NBC, z_NBC)[0]
 
     L2 = tf.reduce_mean( tf.square(fitted_boundary_NBC_z ) )
+    # L2 = tf.reduce_mean(tf.zeros(tf.shape(a_NBC)))
     
 
     # Loss term #3: initial/terminal condition
@@ -169,10 +176,9 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     fitted_boundary_SC_lower = model(
         tf.stack([a_SC_lower[:,0], z_SC_lower[:,0]], axis=1))
 
-    # fitted_boundary_SC_lower = model(a_SC_lower[:,0], z_SC_lower[:,0])
     fitted_boundary_SC_lower_a = tf.gradients(
         fitted_boundary_SC_lower, a_SC_lower)[0]
-    opt_boundary_SC_lower_a = tf.maximum(fitted_boundary_SC_lower_a - u_deriv(
+    opt_boundary_SC_lower_a = tf.minimum(fitted_boundary_SC_lower_a - u_deriv(
         z_SC_lower+r*a_SC_lower), tf.zeros_like(fitted_boundary_SC_lower))
     
     L3_lower = tf.reduce_mean(tf.square(opt_boundary_SC_lower_a))
@@ -180,15 +186,15 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     fitted_boundary_SC_upper = model(
         tf.stack([a_SC_upper[:, 0], z_SC_upper[:, 0]], axis=1))
 
-    # fitted_boundary_SC_upper = model(a_SC_upper, z_SC_upper)
     fitted_boundary_SC_upper_a = tf.gradients(
         fitted_boundary_SC_upper, a_SC_upper)[0]
-    opt_boundary_SC_upper_a = tf.minimum(fitted_boundary_SC_upper_a - u_deriv(
+    opt_boundary_SC_upper_a = tf.maximum(fitted_boundary_SC_upper_a - u_deriv(
         z_SC_upper+r*a_SC_upper), tf.zeros_like(fitted_boundary_SC_upper))
     
     L3_upper = tf.reduce_mean(tf.square(opt_boundary_SC_upper_a))
     
     L3 = L3_lower + L3_upper
+    # L3 = tf.reduce_mean(tf.zeros(tf.shape(a_SC_lower)))
     
     return L1, L2, L3
     # return L1, L2
@@ -305,47 +311,47 @@ fitted_Vaa = sess.run([V_aa], feed_dict={
                     a_interior_tnsr: Xgrid[:,0:1], z_interior_tnsr: Xgrid[:,1:2]})[0]
 
 
-fig = plt.figure(figsize=(9*4, 6*4))
-ax = fig.add_subplot(2,2,1, projection='3d')
-ax.plot_surface(A, Z, fitted_V.reshape(n_plot+1, n_plot+1), cmap='viridis')
+# fig = plt.figure(figsize=(9*4, 6*4))
+# ax = fig.add_subplot(2,2,1, projection='3d')
+# ax.plot_surface(A, Z, fitted_V.reshape(n_plot+1, n_plot+1), cmap='viridis')
+# # ax.view_init(35, 35)
+# ax.set_xlabel('$a$')
+# ax.set_ylabel('$z$')
+# ax.set_title('Value Function')
+
+# # fig = plt.figure(figsize=(9, 6))
+# ax = fig.add_subplot(2,2,2, projection='3d')
+# ax.plot_surface(A, Z, fitted_c.reshape(n_plot+1, n_plot+1), cmap='viridis')
 # ax.view_init(35, 35)
-ax.set_xlabel('$a$')
-ax.set_ylabel('$z$')
-ax.set_title('Value Function')
+# ax.set_xlabel('$a$')
+# ax.set_ylabel('$z$')
+# ax.set_title('Consumption')
+# # ax.set_title('Deep Learning Solution')
 
-# fig = plt.figure(figsize=(9, 6))
-ax = fig.add_subplot(2,2,2, projection='3d')
-ax.plot_surface(A, Z, fitted_c.reshape(n_plot+1, n_plot+1), cmap='viridis')
-ax.view_init(35, 35)
-ax.set_xlabel('$a$')
-ax.set_ylabel('$z$')
-ax.set_title('Consumption')
-# ax.set_title('Deep Learning Solution')
+# # # Surface plot of solution u(t,x)
+# # fig = plt.figure(figsize=(9, 6))
+# ax = fig.add_subplot(2,2,3, projection='3d')
+# ax.plot_surface(A, Z, fitted_Va.reshape(n_plot+1, n_plot+1), cmap='viridis')
+# ax.view_init(35, 35)
+# ax.set_xlabel('$a$')
+# ax.set_ylabel('$z$')
+# ax.set_title('$\partial V / \partial a$')
+# # ax.set_title('Deep Learning Solution')
 
-# # Surface plot of solution u(t,x)
-# fig = plt.figure(figsize=(9, 6))
-ax = fig.add_subplot(2,2,3, projection='3d')
-ax.plot_surface(A, Z, fitted_Va.reshape(n_plot+1, n_plot+1), cmap='viridis')
-ax.view_init(35, 35)
-ax.set_xlabel('$a$')
-ax.set_ylabel('$z$')
-ax.set_title('$\partial V / \partial a$')
-# ax.set_title('Deep Learning Solution')
+# # # Surface plot of solution u(t,x)
+# # fig = plt.figure(figsize=(9, 6))
+# ax = fig.add_subplot(2,2,4, projection='3d')
+# ax.plot_surface(A, Z, fitted_Vaa.reshape(n_plot+1, n_plot+1), cmap='viridis')
+# ax.view_init(35, 35)
+# ax.set_xlabel('$a$')
+# ax.set_ylabel('$z$')
+# # ax.set_zlabel('$V_aa$')
+# ax.set_title('$\partial^2 V / \partial a^2$')
 
-# # Surface plot of solution u(t,x)
-# fig = plt.figure(figsize=(9, 6))
-ax = fig.add_subplot(2,2,4, projection='3d')
-ax.plot_surface(A, Z, fitted_Vaa.reshape(n_plot+1, n_plot+1), cmap='viridis')
-ax.view_init(35, 35)
-ax.set_xlabel('$a$')
-ax.set_ylabel('$z$')
-# ax.set_zlabel('$V_aa$')
-ax.set_title('$\partial^2 V / \partial a^2$')
-
-plt.savefig(figureName + '_All.pdf')
+# plt.savefig(figureName + '_All.pdf')
 
 
-fig = plt.figure(figsize=(9, 6))
+fig = plt.figure(figsize=(16, 9))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(A, Z, fitted_V.reshape(n_plot+1, n_plot+1), cmap='viridis')
 # ax.view_init(35, 35)
@@ -355,7 +361,7 @@ ax.set_title('Value Function')
 
 plt.savefig(figureName + '_Value.pdf')
 
-fig = plt.figure(figsize=(9, 6))
+fig = plt.figure(figsize=(16, 9))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(A, Z, fitted_c.reshape(n_plot+1, n_plot+1), cmap='viridis')
 ax.view_init(35, 35)
@@ -366,7 +372,7 @@ ax.set_title('Consumption')
 plt.savefig(figureName + '_Consumption.pdf')
 
 # # Surface plot of solution u(t,x)
-fig = plt.figure(figsize=(9, 6))
+fig = plt.figure(figsize=(16, 9))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(A, Z, fitted_Va.reshape(n_plot+1, n_plot+1), cmap='viridis')
 ax.view_init(35, 35)
@@ -377,7 +383,7 @@ ax.set_title('$\partial V / \partial a$')
 plt.savefig(figureName + '_Va.pdf')
 
 # # Surface plot of solution u(t,x)
-fig = plt.figure(figsize=(9, 6))
+fig = plt.figure(figsize=(16, 9))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(A, Z, fitted_Vaa.reshape(n_plot+1, n_plot+1), cmap='viridis')
 ax.view_init(35, 35)

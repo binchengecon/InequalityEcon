@@ -204,3 +204,69 @@ class DGMNet(tf.keras.Model):
         result = self.final_layer.call(S)
         
         return result
+    
+    
+class DCGMNet(tf.keras.Model):
+
+    # constructor/initializer function (automatically called when new instance of class is created)
+    def __init__(self, layer_width, n_layers_FFNN, n_layers_RNN, input_dim, final_trans=None):
+        '''
+        Args:
+            layer_width: 
+            n_layers:    number of intermediate LSTM layers
+            input_dim:   spaital dimension of input data (EXCLUDES time dimension)
+            final_trans: transformation used in final layer
+        
+        Returns: customized Keras model object representing DGM neural network
+        '''
+
+        # create an instance of a Model object (call initialize function of superclass of DGMNet)
+        super(DGMNet, self).__init__()
+
+        # define initial layer as fully connected
+        # NOTE: to account for time inputs we use input_dim+1 as the input dimensionality
+        
+        self.initial_layer = DenseLayer(
+            layer_width, input_dim, transformation="tanh")
+        
+        self.n_layers_FFNN = n_layers_FFNN
+        self.DenseLayerList = []
+        for _ in range(self.n_layers_FFNN):
+            self.DenseLayerList.append(DenseLayer(
+                layer_width, layer_width, transformation="tanh"))
+
+        # define intermediate LSTM layers
+        self.n_layers_RNN = n_layers_RNN
+        self.LSTMLayerList = []
+
+        for _ in range(self.n_layers):
+            self.LSTMLayerList.append(LSTMLayer(layer_width, input_dim))
+
+        # define final layer as fully connected with a single output (function value)
+        self.final_layer = DenseLayer(
+            1, layer_width, transformation=final_trans)
+
+    # main function to be called
+
+    def call(self, x):
+        '''            
+        Args:
+            x: sampled space inputs
+
+        Run the DGM model and obtain fitted function value at the inputs (x)                
+        '''
+
+        # define input vector as time-space pairs
+        X = x
+
+        # call initial layer
+        S = self.initial_layer.call(X)
+
+        # call intermediate LSTM layers
+        for i in range(self.n_layers):
+            S = self.LSTMLayerList[i].call(S, X)
+
+        # call final LSTM layers
+        result = self.final_layer.call(S)
+
+        return result
