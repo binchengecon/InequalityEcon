@@ -5,18 +5,21 @@ python_name="MollProblem_mercury.py" # 3 dmg
 
 
 
-num_layers_arr=(2 3 4 5 6)
-nodes_per_layer_arr=(20 30 40 50 60)
+num_layers_arr=(3 4 5 6)
+nodes_per_layer_arr=(30 40 50 60)
 
 # sampling_stages_arr=(10 5)
-sampling_stages_arr=(20000 50000)
-steps_per_sample_arr=(10 5)
+# sampling_stages_arr=(20000 50000)
+# steps_per_sample_arr=(10 5)
 
-nSim_interior_arr=(1024 2048)
-nSim_boundary_arr=(128 256)
+# nSim_interior_arr=(1024 2048)
+# nSim_boundary_arr=(128 256)
 
-LENGTH_layers=$((${#num_layers_arr[@]} - 1))
-LENGTH_nodes=$((${#nodes_per_layer_arr[@]} - 1))
+sampling_stages_arr=(20000)
+steps_per_sample_arr=(10)
+
+nSim_interior_arr=(1024)
+nSim_boundary_arr=(128)
 
 
 count=0
@@ -31,23 +34,23 @@ for num_layers in ${num_layers_arr[@]}; do
                         action_name="num_layers_${num_layers}_nodes_per_layer_${nodes_per_layer}_sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}_nSim_interior_${nSim_interior}_nSim_boundary_${nSim_boundary}"
 
 
-                        mkdir -p ./job-outs/${action_name}/
+                        mkdir -p ./job-outs/${python_name}/${action_name}/
 
-                        if [ -f ./bash/${action_name}/train.sh ]; then
-                            rm ./bash/${action_name}/train.sh
+                        if [ -f ./bash/${python_name}/${action_name}/train.sh ]; then
+                            rm ./bash/${python_name}/${action_name}/train.sh
                         fi
 
-                        mkdir -p ./bash/${action_name}/
+                        mkdir -p ./bash/${python_name}/${action_name}/
 
-                        touch ./bash/${action_name}/train.sh
+                        touch ./bash/${python_name}/${action_name}/train.sh
 
-                        tee -a ./bash/${action_name}/train.sh <<EOF
+                        tee -a ./bash/${python_name}/${action_name}/train.sh <<EOF
 #! /bin/bash
 
 ######## login
 #SBATCH --job-name=num_layers_${num_layers}_nodes_per_layer_${nodes_per_layer}_sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}_nSim_interior_{nSim_interior}_nSim_boundary_${nSim_boundary}
-#SBATCH --output=./job-outs/${action_name}/train.out
-#SBATCH --error=./job-outs/${action_name}/train.err
+#SBATCH --output=./job-outs/${python_name}/${action_name}/train.out
+#SBATCH --error=./job-outs/${python_name}/${action_name}/train.err
 
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=caslake
@@ -78,7 +81,7 @@ eval "echo Elapsed time: \$(date -ud "@\$elapsed" +'\$((%s/3600/24)) days %H hr 
 
 EOF
 						count=$(($count + 1))
-						sbatch ./bash/${action_name}/train.sh
+						sbatch ./bash/${python_name}/${action_name}/train.sh
 					done
 				done
 			done
