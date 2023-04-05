@@ -3,13 +3,21 @@
 
 # python_name="MollProblem_mercury_DCGM.py" # 3 dmg
 # python_name="MollProblem_mercury_DCGM_NoUpper.py" # 3 dmg
-python_name="MollProblem_mercury_DCGM_IneqLower.py" # 3 dmg
+# python_name="MollProblem_mercury_DCGM_IneqLower.py" # 3 dmg
+python_name="MollProblem_mercury_DCGM2_IneqLower.py" # 3 dmg
+# python_name="MollProblem_mercury_DCGM2_IneqLower_gamma=2.py" # 3 dmg
 
 
 
-num_layers_FFNN_arr=(3 4 5 6)
-num_layers_RNN_arr=(0 1 2 3 4 5)
-nodes_per_layer_arr=(30 40 50 60)
+num_layers_FFNN_arr=(0)
+activation_FFNN_arr=("tanh" "relu")
+num_layers_RNN_arr=(3)
+
+# num_layers_FFNN_arr=(1)
+# num_layers_RNN_arr=(1)
+
+nodes_per_layer_arr=(50)
+# nodes_per_layer_arr=(20)
 
 # sampling_stages_arr=(20000 50000)
 # steps_per_sample_arr=(10 5)
@@ -17,11 +25,11 @@ nodes_per_layer_arr=(30 40 50 60)
 # nSim_interior_arr=(1024 2048)
 # nSim_boundary_arr=(128 256)
 
-sampling_stages_arr=(50000)
-steps_per_sample_arr=(10)
+# sampling_stages_arr=(50000 100000 1000000)
+# steps_per_sample_arr=(10 5 1)
 
-nSim_interior_arr=(1024)
-nSim_boundary_arr=(128)
+# nSim_interior_arr=(1024 512 64)
+# nSim_boundary_arr=(128 32)
 
 
 # num_layers_FFNN_arr=(1)
@@ -29,11 +37,11 @@ nSim_boundary_arr=(128)
 # nodes_per_layer_arr=(30)
 
 # # sampling_stages_arr=(10 5)
-# sampling_stages_arr=(10)
-# steps_per_sample_arr=(1)
+sampling_stages_arr=(10)
+steps_per_sample_arr=(1)
 
-# nSim_interior_arr=(1024)
-# nSim_boundary_arr=(128)
+nSim_interior_arr=(1024)
+nSim_boundary_arr=(128)
 
 
 
@@ -44,6 +52,7 @@ LENGTH_nodes=$((${#nodes_per_layer_arr[@]} - 1))
 count=0
 
 for num_layers_FFNN in ${num_layers_FFNN_arr[@]}; do
+for activation_FFNN in ${activation_FFNN_arr[@]}; do
     for num_layers_RNN in ${num_layers_RNN_arr[@]}; do
         for nodes_per_layer in ${nodes_per_layer_arr[@]}; do
             for sampling_stages in ${sampling_stages_arr[@]}; do
@@ -51,7 +60,7 @@ for num_layers_FFNN in ${num_layers_FFNN_arr[@]}; do
                     for nSim_interior in ${nSim_interior_arr[@]}; do  
                         for nSim_boundary in ${nSim_boundary_arr[@]}; do
 
-                            action_name="num_layers_FFNN_${num_layers_FFNN}_num_layers_RNN_${num_layers_RNN}_nodes_per_layer_${nodes_per_layer}_sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}_nSim_interior_${nSim_interior}_nSim_boundary_${nSim_boundary}"
+                            action_name="num_layers_FFNN_${num_layers_FFNN}_activation_FFNN_${activation_FFNN}_num_layers_RNN_${num_layers_RNN}_nodes_per_layer_${nodes_per_layer}/sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}/nSim_interior_${nSim_interior}_nSim_boundary_${nSim_boundary}"
 
 
                             mkdir -p ./job-outs/${python_name}/${action_name}/
@@ -68,14 +77,14 @@ for num_layers_FFNN in ${num_layers_FFNN_arr[@]}; do
 #! /bin/bash
 
 ######## login
-#SBATCH --job-name=num_layers_FFNN_${num_layers_FFNN}_num_layers_RNN_${num_layers_RNN}_nodes_per_layer_${nodes_per_layer}_sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}_nSim_interior_{nSim_interior}_nSim_boundary_${nSim_boundary}
+#SBATCH --job-name=num_layers_FFNN_${num_layers_FFNN}_activation_FFNN_${activation_FFNN}_num_layers_RNN_${num_layers_RNN}_nodes_per_layer_${nodes_per_layer}_sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}_nSim_interior_{nSim_interior}_nSim_boundary_${nSim_boundary}
 #SBATCH --output=./job-outs/${python_name}/${action_name}/train.out
 #SBATCH --error=./job-outs/${python_name}/${action_name}/train.err
 
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=caslake
 #SBATCH --cpus-per-task=5
-#SBATCH --mem=5G
+#SBATCH --mem=10G
 #SBATCH --time=1-00:00:00
 ##SBATCH --exclude=mcn53,mcn51,mcn05
 
@@ -88,7 +97,7 @@ echo "Program starts \$(date)"
 start_time=\$(date +%s)
 # perform a task
 
-python3 -u  /home/bincheng/InequalityEcon/$python_name --num_layers_FFNN ${num_layers_FFNN} --num_layers_RNN ${num_layers_RNN} --nodes_per_layer ${nodes_per_layer}  --sampling_stages ${sampling_stages} --steps_per_sample ${steps_per_sample} --nSim_interior ${nSim_interior} --nSim_boundary  ${nSim_boundary} 
+python3 -u  /home/bincheng/InequalityEcon/$python_name --num_layers_FFNN ${num_layers_FFNN} --activation_FFNN ${activation_FFNN} --num_layers_RNN ${num_layers_RNN} --nodes_per_layer ${nodes_per_layer}  --sampling_stages ${sampling_stages} --steps_per_sample ${steps_per_sample} --nSim_interior ${nSim_interior} --nSim_boundary  ${nSim_boundary} 
 
 echo "Program ends \$(date)"
 end_time=\$(date +%s)
@@ -108,4 +117,5 @@ EOF
             done
         done
     done
+done
 done
