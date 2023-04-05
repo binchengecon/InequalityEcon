@@ -1,29 +1,24 @@
 #! /bin/bash
 
-
-# python_name="MollProblem_mercury_DCGM.py" # 3 dmg
-# python_name="MollProblem_mercury_DCGM_NoUpper.py" # 3 dmg
-# python_name="MollProblem_mercury_DCGM_IneqLower.py" # 3 dmg
 python_name="MollProblem_mercury_DCGM2_IneqLower.py" # 3 dmg
-# python_name="MollProblem_mercury_DCGM2_IneqLower_gamma=2.py" # 3 dmg
 
 
 
-num_layers_FFNN_arr=(0)
+num_layers_FFNN_arr=(0 2 3 4 5)
 activation_FFNN_arr=("tanh" "relu")
 num_layers_RNN_arr=(3)
 
 # num_layers_FFNN_arr=(1)
 # num_layers_RNN_arr=(1)
 
-nodes_per_layer_arr=(50)
+nodes_per_layer_arr=(20 30 40 50 60)
 # nodes_per_layer_arr=(20)
 
-# sampling_stages_arr=(20000 50000)
-# steps_per_sample_arr=(10 5)
+sampling_stages_arr=(50000)
+steps_per_sample_arr=(10 5)
 
-# nSim_interior_arr=(1024 2048)
-# nSim_boundary_arr=(128 256)
+nSim_interior_arr=(1024 2048)
+nSim_boundary_arr=(128 256)
 
 # sampling_stages_arr=(50000 100000 1000000)
 # steps_per_sample_arr=(10 5 1)
@@ -37,11 +32,11 @@ nodes_per_layer_arr=(50)
 # nodes_per_layer_arr=(30)
 
 # # sampling_stages_arr=(10 5)
-sampling_stages_arr=(10)
-steps_per_sample_arr=(1)
+# sampling_stages_arr=(10)
+# steps_per_sample_arr=(1)
 
-nSim_interior_arr=(1024)
-nSim_boundary_arr=(128)
+# nSim_interior_arr=(1024)
+# nSim_boundary_arr=(128)
 
 
 

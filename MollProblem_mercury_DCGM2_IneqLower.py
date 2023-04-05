@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import argparse
 import os
 import csv
-
+import pandas as pd
 
 # Parameters 
 
@@ -347,14 +347,24 @@ ax.plot_surface(A, Z, fitted_V.reshape(n_plot, n_plot), cmap='viridis')
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 ax.set_zlabel('$v(a,z)$')
-ax.set_title('Deep Learning Solution')
-
-
-
-
-
+# ax.set_title('Deep Learning Solution')
 
 plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Value.png')
+
+
+Moll_V = pd.read_csv("./MollData/V.csv", header = None)
+
+fig = plt.figure(figsize=(16, 9))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, fitted_V.reshape(n_plot, n_plot)-Moll_V, cmap='viridis')
+# ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+ax.set_zlabel('$v(a,z)$')
+# ax.set_title('Deep Learning Solution')
+
+plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_ValueDiff.png')
+
 
 # # Surface plot of solution u(t,x)
 fig = plt.figure(figsize=(16, 9))
@@ -381,6 +391,20 @@ ax.set_title('$\partial V / \partial a$')
 # ax.set_title('Deep Learning Solution')
 plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Va.png')
 
+Moll_Va = pd.read_csv("./MollData/Va_Upwind.csv", header = None)
+
+fig = plt.figure(figsize=(16, 9))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, fitted_Va.reshape(n_plot, n_plot)-Moll_Va, cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+ax.set_title('$\partial V / \partial a$')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaDiff.png')
+
+
+
 # # Surface plot of solution u(t,x)
 fig = plt.figure(figsize=(16, 9))
 ax = fig.add_subplot(111, projection='3d')
@@ -403,6 +427,24 @@ ax.set_ylabel('$z$')
 ax.set_title('$\partial V / \partial z$')
 # ax.set_title('Deep Learning Solution')
 plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vz.png')
+
+
+Moll_Vz = pd.read_csv("./MollData/Vz.csv", header = None)
+
+Diff_Vz = fitted_Vz.reshape(n_plot, n_plot)-Moll_Vz
+
+# pd.DataFrame(Diff_Vz).to_csv('./Figure/' +savefolder+ '/' + saveName +'_Diff_Vz.csv')    
+
+fig = plt.figure(figsize=(16, 9))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, Diff_Vz, cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+ax.set_title('$\partial V / \partial z$')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VzDiff.png')
+
 
 # # Surface plot of solution u(t,x)
 fig = plt.figure(figsize=(16, 9))
