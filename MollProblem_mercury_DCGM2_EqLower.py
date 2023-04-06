@@ -107,8 +107,9 @@ def sampler(nSim_interior, nSim_boundary):
 #    t_interior = np.random.uniform(low=t_low - t_oversample, high=T, size=[nSim_interior, 1])
     # X_interior = np.random.uniform(low=X_low - 0.5*(X_high-X_low), high=X_high + 0.5*(X_high-X_low), size=[nSim_interior, 1])
     # a_interior = np.random.uniform(low=X_low[0], high=X_high[0], size=[nSim_interior, 1])
-    a_interior = np.random.uniform(low=0, high=1, size=[nSim_interior, 1])**1.3 * (X_high[0]-X_low[0]) + X_low[0]
-    z_interior = np.random.uniform(low=X_low[1], high=X_high[1], size=[nSim_interior, 1])
+    a_interior = np.random.uniform(low=0, high=1, size=[nSim_interior, 1])**2 * (X_high[0]-X_low[0]) + X_low[0]
+    # z_interior = np.random.uniform(low=X_low[1], high=X_high[1], size=[nSim_interior, 1])
+    z_interior = np.random.uniform(low=0, high=1, size=[nSim_interior, 1])**2 * (X_high[1]-X_low[1]) + X_low[1]
 #    X_interior = np.random.uniform(low=X_low - X_oversample, high=X_high + X_oversample, size=[nSim_interior, 1])
 #    X_interior = np.random.uniform(low=X_low * X_multiplier_low, high=X_high * X_multiplier_high, size=[nSim_interior, 1])
 
@@ -405,7 +406,20 @@ ax.set_ylabel('$z$')
 # ax.set_zlabel('$\partial V / \partial a$')
 ax.set_zlabel('Difference')
 # ax.set_title('Deep Learning Solution')
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaDiff.png',bbox_inches='tight')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaDiffUpwind.png',bbox_inches='tight')
+
+Moll_Vacenter = pd.read_csv("./MollData/Va_center.csv", header = None)
+
+fig = plt.figure(figsize=(16, 9))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, fitted_Va.reshape(n_plot, n_plot)-Moll_Vacenter, cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+# ax.set_zlabel('$\partial V / \partial a$')
+ax.set_zlabel('Difference')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaDiffCenter.png',bbox_inches='tight')
 
 
 
