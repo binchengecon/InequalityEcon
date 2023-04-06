@@ -65,7 +65,7 @@ n_plot = 600  # Points on plot grid for each dimension
 
 # Save options
 saveOutput = False
-savefolder = 'Moll_IneqLower2/num_layers_FFNN_{}_activation_FFNN_{}_num_layers_RNN_{}_nodes_per_layer_{}/sampling_stages_{}_steps_per_sample_{}/nSim_interior_{}_nSim_boundary_{}'.format(num_layers_FFNN, activation_FFNN, num_layers_RNN, nodes_per_layer, sampling_stages, steps_per_sample, nSim_interior, nSim_boundary)
+savefolder = 'Moll_IneqLower2MidSample/num_layers_FFNN_{}_activation_FFNN_{}_num_layers_RNN_{}_nodes_per_layer_{}/sampling_stages_{}_steps_per_sample_{}/nSim_interior_{}_nSim_boundary_{}'.format(num_layers_FFNN, activation_FFNN, num_layers_RNN, nodes_per_layer, sampling_stages, steps_per_sample, nSim_interior, nSim_boundary)
 saveName   = 'MollProblem' 
 saveFigure = True
 figureName = 'MollProblem' 
@@ -289,7 +289,10 @@ loss_list = []
 for i in range(sampling_stages):
     
     # sample uniformly from the required regions
-    a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_SC_lower, z_SC_lower = sampler(nSim_interior, nSim_boundary)
+    if i>sampling_stages/2:
+        a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_SC_lower, z_SC_lower = sampler(nSim_interior*20, nSim_boundary*20)
+    else:
+        a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_SC_lower, z_SC_lower = sampler(nSim_interior, nSim_boundary)
     
     # for a given sample, take the required number of SGD steps
     for _ in range(steps_per_sample):
@@ -391,7 +394,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 ax.set_title('$\partial V / \partial a$')
 # ax.set_title('Deep Learning Solution')
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Va.png',bbox_inches='tight')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Va.png')
 
 Moll_Va = pd.read_csv("./MollData/Va_Upwind.csv", header = None)
 

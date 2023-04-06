@@ -65,7 +65,7 @@ n_plot = 600  # Points on plot grid for each dimension
 
 # Save options
 saveOutput = False
-savefolder = 'Moll_IneqLower2/num_layers_FFNN_{}_activation_FFNN_{}_num_layers_RNN_{}_nodes_per_layer_{}/sampling_stages_{}_steps_per_sample_{}/nSim_interior_{}_nSim_boundary_{}'.format(num_layers_FFNN, activation_FFNN, num_layers_RNN, nodes_per_layer, sampling_stages, steps_per_sample, nSim_interior, nSim_boundary)
+savefolder = 'Moll_EqLowerNoUpper/num_layers_FFNN_{}_activation_FFNN_{}_num_layers_RNN_{}_nodes_per_layer_{}/sampling_stages_{}_steps_per_sample_{}/nSim_interior_{}_nSim_boundary_{}'.format(num_layers_FFNN, activation_FFNN, num_layers_RNN, nodes_per_layer, sampling_stages, steps_per_sample, nSim_interior, nSim_boundary)
 saveName   = 'MollProblem' 
 saveFigure = True
 figureName = 'MollProblem' 
@@ -127,6 +127,7 @@ def sampler(nSim_interior, nSim_boundary):
     #     low=0, high=1, size=[nSim_boundary, 1])
     z_SC_lower = np.random.uniform(
         low=0, high=1, size=[nSim_boundary, 1])**2 * (X_high[1]-X_low[1]) + X_low[1]
+
     # Sampler #3: initial/terminal condition
     # t_terminal = T * np.ones((nSim_terminal, 1))
 #    X_terminal = np.random.uniform(low=X_low - X_oversample, high=X_high + X_oversample, size = [nSim_terminal, 1])
@@ -196,14 +197,14 @@ def loss(model, a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_
     # fitted_boundary_SC_lower = model(a_SC_lower[:,0], z_SC_lower[:,0])
     fitted_boundary_SC_lower_a = tf.gradients(
         fitted_boundary_SC_lower, a_SC_lower)[0]
-    opt_boundary_SC_lower_a = tf.minimum(fitted_boundary_SC_lower_a - u_deriv(
-        z_SC_lower+r*a_SC_lower), tf.zeros_like(fitted_boundary_SC_lower))
+    # opt_boundary_SC_lower_a = tf.minimum(fitted_boundary_SC_lower_a - u_deriv(
+    #     z_SC_lower+r*a_SC_lower), tf.zeros_like(fitted_boundary_SC_lower))
     
-    L3_lower = tf.reduce_mean(tf.square(opt_boundary_SC_lower_a))
+    # L3_lower = tf.reduce_mean(tf.square(opt_boundary_SC_lower_a))
 
 
-    # L3_lower = tf.reduce_mean(tf.square(fitted_boundary_SC_lower_a - u_deriv(
-    # z_SC_lower+r*a_SC_lower)))
+    L3_lower = tf.reduce_mean(tf.square(fitted_boundary_SC_lower_a - u_deriv(
+    z_SC_lower+r*a_SC_lower)))
     
     
     fitted_boundary_SC_upper = model(
@@ -317,8 +318,8 @@ os.makedirs('./Figure/'+savefolder+'/',exist_ok=True)
 figwidth = 10
 
 # figure options
-plt.figure()
-plt.figure(figsize = (12,10))
+# plt.figure()
+# plt.figure(figsize = (12,10))
 
 
 # vector of t and S values for plotting
@@ -376,7 +377,7 @@ ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 ax.set_zlabel('$c (a,z)$')
-ax.set_title('Deep Learning Solution')
+# ax.set_title('Deep Learning Solution')
 
 
 plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Consumption.png',bbox_inches='tight')
@@ -389,7 +390,7 @@ ax.plot_surface(A, Z, fitted_Va.reshape(n_plot, n_plot), cmap='viridis')
 ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
-ax.set_title('$\partial V / \partial a$')
+ax.set_zlabel('$\partial V / \partial a$')
 # ax.set_title('Deep Learning Solution')
 plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Va.png',bbox_inches='tight')
 
@@ -401,7 +402,8 @@ ax.plot_surface(A, Z, fitted_Va.reshape(n_plot, n_plot)-Moll_Va, cmap='viridis')
 ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
-ax.set_title('$\partial V / \partial a$')
+# ax.set_zlabel('$\partial V / \partial a$')
+ax.set_zlabel('Difference')
 # ax.set_title('Deep Learning Solution')
 plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaDiff.png',bbox_inches='tight')
 
@@ -415,7 +417,7 @@ ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 # ax.set_zlabel('$V_aa$')
-ax.set_title('$\partial^2 V / \partial a^2$')
+ax.set_zlabel('$\partial^2 V / \partial a^2$')
 plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vaa.png',bbox_inches='tight')
 
 
@@ -426,7 +428,7 @@ ax.plot_surface(A, Z, fitted_Vz.reshape(n_plot, n_plot), cmap='viridis')
 ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
-ax.set_title('$\partial V / \partial z$')
+ax.set_zlabel('$\partial V / \partial z$')
 # ax.set_title('Deep Learning Solution')
 plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vz.png',bbox_inches='tight')
 
@@ -443,7 +445,7 @@ ax.plot_surface(A, Z, Diff_Vz, cmap='viridis')
 ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
-ax.set_title('$\partial V / \partial z$')
+ax.set_zlabel('Difference')
 # ax.set_title('Deep Learning Solution')
 plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VzDiff.png',bbox_inches='tight')
 
@@ -456,7 +458,7 @@ ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 # ax.set_zlabel('$V_aa$')
-ax.set_title('$\partial^2 V / \partial z^2$')
+ax.set_zlabel('$\partial^2 V / \partial z^2$')
 plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vzz.png',bbox_inches='tight')
 
 
