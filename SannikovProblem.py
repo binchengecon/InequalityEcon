@@ -19,13 +19,13 @@ X_low = 0.0  # wealth lower bound
 X_high = 1           # wealth upper bound
 
 # neural network parameters
-num_layers = 6
-nodes_per_layer = 20
+num_layers = 3
+nodes_per_layer = 50
 starting_learning_rate = 0.001
 
 # Training parameters
-sampling_stages  = 20000   # number of times to resample new time-space domain points
-steps_per_sample = 5    # number of SGD steps to take before re-sampling
+sampling_stages  = 10000   # number of times to resample new time-space domain points
+steps_per_sample = 10    # number of SGD steps to take before re-sampling
 
 # Sampling parameters
 nSim_interior = 1000
@@ -237,8 +237,13 @@ if saveOutput:
 #%% Plot value function results
 
 # LaTeX rendering for text in plots
-plt.rc('text', usetex=True)
-plt.rc('font', family='serif')
+plt.style.use('classic')
+plt.rcParams["savefig.bbox"] = "tight"
+# plt.rcParams["figure.figsize"] = (10,8)
+# plt.rcParams["figure.dpi"] = 500
+plt.rcParams["font.size"] = 16
+# plt.rcParams["legend.frameon"] = True
+# plt.rcParams["lines.linewidth"] = 5
 
 figwidth = 10
 
@@ -269,28 +274,28 @@ fitted_c = sess.run([numerical_c], feed_dict= {X_interior_tnsr:X_plot})[0]
 B_W = r*(X_plot-fitted_c**(1/2)+fitted_a**2/2+2*fitted_a/5)
 fitted_drift = B_W
 
-axs["left column"].plot(X_plot, fitted_V)
+axs["left column"].plot(X_plot, fitted_V, color = 'red')
 axs["left column"].set_ylim(-1,0.15)
-axs["left column"].plot(X_plot, F0(X_plot))
-axs["left column"].set_title("Profit")
+axs["left column"].plot(X_plot, F0(X_plot), color = 'black')
+axs["left column"].set_title("Profit $F(W)$")
 axs["left column"].grid(linestyle=':')
 
-axs["right top"].plot(X_plot, fitted_a)
+axs["right top"].plot(X_plot, fitted_a, color = 'red')
 axs["right top"].set_ylim(0,1)
-axs["right top"].set_title("Effort a(W)")
+axs["right top"].set_title("Effort $a(W)$")
 axs["right top"].grid(linestyle=':')
 
-axs["right mid"].plot(X_plot, fitted_c)
+axs["right mid"].plot(X_plot, fitted_c, color = 'red')
 axs["right mid"].set_ylim(0, 1)
-axs["right mid"].set_title("Consumption c(W)")
+axs["right mid"].set_title("Consumption $c(W)$")
 axs["right mid"].grid(linestyle=':')
 
-axs["right down"].plot(X_plot, fitted_drift)
+axs["right down"].plot(X_plot, fitted_drift, color = 'red')
 axs["right down"].set_ylim(0, 0.1)
-axs["right down"].set_title("Drift of W")
+axs["right down"].set_title("Drift of $W$")
 axs["right down"].grid(linestyle=':')
     
-
+plt.savefig(figureName + '_All.pdf')
 
 
 if saveFigure:
@@ -304,5 +309,8 @@ ax = fig.add_subplot(111)
 ax.semilogy(range(len(loss_list)), loss_list, 'k-')
 ax.set_xlabel('$n_{epoch}$')
 ax.set_ylabel('$\\phi^{n_{epoch}}$')
+
+plt.savefig(figureName + '_LossList.pdf')
+
 if saveFigure:
     plt.savefig(figureName + '_LossList.pdf')   

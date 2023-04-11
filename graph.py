@@ -22,6 +22,9 @@ X_high = np.array([4, zmean*1.2])          # wealth upper bound
 
 n_plot = 600  # Points on plot grid for each dimension
 
+def u_deriv(c):
+    return c**(-gamma)
+
 
 aspace = np.linspace(-0.02, 4, n_plot)
 zspace = np.linspace(zmean*0.8, zmean*1.2, n_plot)
@@ -69,4 +72,53 @@ ax.set_ylabel('$z$')
 # ax.set_zlabel('Difference')
 # ax.set_title('Deep Learning Solution')
 plt.savefig('./MollData/Vaa_center_py.png',bbox_inches='tight')
+
+
+
+
+Moll_Vacenter = pd.read_csv("./MollData/Va_center.csv", header= None)
+Moll_Vacenter = np.array(Moll_Vacenter)
+Moll_Va = pd.read_csv("./MollData/Va_Upwind.csv", header = None)
+Moll_Va = np.array(Moll_Va)
+
+plt.style.use('classic')
+plt.rcParams["savefig.bbox"] = "tight"
+# plt.rcParams["figure.figsize"] = (10,8)
+# plt.rcParams["figure.dpi"] = 500
+plt.rcParams["font.size"] = 16
+plt.rcParams['text.usetex']=True
+# plt.rcParams["legend.frameon"] = True
+# plt.rcParams["lines.linewidth"] = 5
+
+fig = plt.figure(figsize=(16, 9))
+plt.plot(Z[:, 0], Moll_Vacenter[:, 0], label=r'$\partial_a v( \underline a,z)$: Forward', color='black')
+# plt.plot(Z[:,0], Moll_Va[:,0],label='$\partial_a v(a,z)$: Upwind')
+plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+         label=r'$u^\prime(z + r \underline a )$', color='red')
+# plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+#          label=r'$u^\prime(z + r a)$', color = 'red')
+# plt.view_init(35, 35)
+plt.xlabel('$z$')
+plt.ylim(0.75, 1.10)
+plt.legend()
+# plt.show()
+# ax.set_zlabel('$\partial V / \partial a$')
+# ax.set_zlabel('Difference')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./MollData/Va_analysis_FB.pdf', bbox_inches='tight')
+
+fig = plt.figure(figsize=(16, 9))
+# plt.plot(Z[:,0], Moll_Vacenter[:,0],label='$\partial_a v(a,z)$: Forward')
+plt.plot(Z[:,0], Moll_Va[:,0],label=r'$\partial_a v( \underline a,z)$: Upwind', color='black')
+# plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]), label=r'$u^\prime(z + r \underline{a})$')
+plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+         label=r'$u^\prime(z + r \underline a )$', color='red')
+# plt.view_init(35, 35)
+plt.xlabel('$z$')
+plt.ylim(0.75, 1.10)
+plt.legend()
+# ax.set_zlabel('$\partial V / \partial a$')
+# ax.set_zlabel('Difference')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./MollData/Va_analysis_UB.pdf', bbox_inches='tight')
 
