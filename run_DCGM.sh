@@ -9,14 +9,24 @@ python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L2_LR.py" # 3 d
 # python_name="MollProblem_mercury_DCGM2_EqLower.py" # 3 dmg
 
 
-num_layers_FFNN_arr=(0 2 3 4 5)
+num_layers_FFNN_arr=(0 2 3 4)
 activation_FFNN_arr=("tanh" "relu")
 num_layers_RNN_arr=(3)
 
-# nodes_per_layer_arr=(40 50 60)
-nodes_per_layer_arr=(50)
+# # nodes_per_layer_arr=(40 50 60)
+# nodes_per_layer_arr=(50)
 
-sampling_stages_arr=(200000)
+
+
+# num_layers_FFNN_arr=(4 5 6 7 8)
+# activation_FFNN_arr=("tanh" "relu")
+# num_layers_RNN_arr=(0)
+
+nodes_per_layer_arr=(40 50 60)
+# nodes_per_layer_arr=(20 30 40 50)
+
+
+sampling_stages_arr=(80000)
 steps_per_sample_arr=(10)
 
 # nSim_interior_arr=(2048)
@@ -26,8 +36,8 @@ steps_per_sample_arr=(10)
 # nSim_interior_arr=(128)
 # nSim_boundary_arr=(32)
 
-nSim_interior_arr=(256)
-nSim_boundary_arr=(64)
+nSim_interior_arr=(192)
+nSim_boundary_arr=(48)
 
 LearningRate_arr=(0.001 0.0001 0.00001)
 
@@ -65,7 +75,7 @@ for num_layers_FFNN in ${num_layers_FFNN_arr[@]}; do
 #! /bin/bash
 
 ######## login
-#SBATCH --job-name=num_layers_FFNN_${num_layers_FFNN}_activation_FFNN_${activation_FFNN}_num_layers_RNN_${num_layers_RNN}_nodes_per_layer_${nodes_per_layer}_sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}_nSim_interior_{nSim_interior}_nSim_boundary_${nSim_boundary}_LearningRate_${LearningRate}
+#SBATCH --job-name=num_layers_FFNN_${num_layers_FFNN}_activation_FFNN_${activation_FFNN}_num_layers_RNN_${num_layers_RNN}_nodes_per_layer_${nodes_per_layer}_sampling_stages_${sampling_stages}_steps_per_sample_${steps_per_sample}_nSim_interior_${nSim_interior}_nSim_boundary_${nSim_boundary}_LearningRate_${LearningRate}
 #SBATCH --output=./job-outs/${python_name}/${action_name}/train.out
 #SBATCH --error=./job-outs/${python_name}/${action_name}/train.err
 

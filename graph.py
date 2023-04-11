@@ -56,3 +56,17 @@ ax.set_zlim(0.75,1.10)
 # ax.set_title('Deep Learning Solution')
 plt.savefig('./MollData/VaUpwind_py.png',bbox_inches='tight')
 
+Moll_Vaa_center = pd.read_csv("./MollData/Vaa_center.csv", header = None)
+
+fig = plt.figure(figsize=(16, 9))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(A, Z, Moll_Vaa_center, cmap='viridis')
+ax.view_init(35, 35)
+ax.set_xlabel('$a$')
+ax.set_ylabel('$z$')
+# ax.set_zlim(0.75,1.10)
+# ax.set_zlabel('$\partial V / \partial a$')
+# ax.set_zlabel('Difference')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./MollData/Vaa_center_py.png',bbox_inches='tight')
+
