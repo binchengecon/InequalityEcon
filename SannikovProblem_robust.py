@@ -7,13 +7,14 @@ import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 #%% Parameters 
 
 # Sannikov problem parameters 
 r = 0.1
 sigma = 1
-xi = 1000
+xi = 1
 # Solution parameters (domain on which to solve PDE)
 X_low = 0.0  # wealth lower bound
 X_high = 1           # wealth upper bound
@@ -40,9 +41,10 @@ n_plot = 600  # Points on plot grid for each dimension
 
 # Save options
 saveOutput = True
-saveName   = 'SannikovProblem2_robust_xi={}'.format(xi)
+savefolder = '/robust_xi={}/'.format(xi)
+saveName   = 'SannikovProblem2'
 saveFigure = False
-figureName = 'SannikovProblem_robust_xi={}'.format(xi)
+figureName = 'SannikovProblem2_robust_xi={}'.format(xi)
 
 #%% Analytical Solution
 
@@ -129,19 +131,23 @@ def loss(model, X_interior, X_boundary):
     
     # a = tf.where(V_x+r*sigma**2*V_xx >= 0, tf.zeros((nSim_interior, 1)), -(1+0.4*V_x+sigma**2*r*0.4*V_xx)/(V_x+r*sigma**2*V_xx))
 
-    index1 =  tf.cast(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx <   0), tf.float32)
-    index2 = tf.cast(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx >= 0), tf.float32)
-    index3 = tf.cast(tf.math.logical_and(
-        V_x < 0, 1 + 0.4 * (V_x+r*sigma ** 2 * V_xx - V_x**2 * sigma**2/xi) > 0) , tf.float32)
-    index4 = tf.cast(tf.math.logical_and(
-        V_x < 0, 1 + 0.4 * (V_x+r*sigma ** 2 * V_xx - V_x**2 * sigma**2/xi)<= 0) , tf.float32)
-    a = (-1/(V_x+r*sigma**2*V_xx) - 0.4) * \
-        index1 + (tf.zeros_like(V)) * index2 + (-1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) - 0.4)*index3 + (tf.zeros_like(V)) * index4
-    # a = tf.cond(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx <   0), lambda: -1/(V_x+r*sigma**2*V_xx) - 0.4, lambda: tf.no_op())
-    # a = tf.cond(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx >=  0), lambda: -1/(V_x+r*sigma**2*V_xx) - 0.4, lambda: tf.no_op())
-    # a = tf.cond(tf.math.logical_and(V_x <  0, V_x+r*sigma**2*V_xx <   0), lambda: -1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) -0.4, lambda: tf.no_op())
-    # a = tf.where(V_x >= 0, -1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) -0.4, -1/(V_x+r*sigma**2*V_xx) - 0.4)
-    h = tf.where(V_x < 0, -sigma* V_x /xi * (a+0.4) , tf.zeros_like(V) )
+
+    # index3 = tf.cast( (V_x+r*sigma ** 2 * V_xx - V_x**2 * sigma**2/xi) > 0 , tf.float32)
+    # index4 = tf.cast(tf.math.logical_and(
+    #     V_x < 0, 1 + 0.4 * (V_x+r*sigma ** 2 * V_xx - V_x**2 * sigma**2/xi)<= 0) , tf.float32)
+    
+    # a = (-1/(V_x+r*sigma**2*V_xx) - 0.4) * \
+    #     index1 + (tf.zeros_like(V)) * index2 + (-1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) - 0.4)*index3 + (tf.zeros_like(V)) * index4
+
+    # a = tf.where( V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi >= 0, tf.zeros_like(V), -1/(V_x+r*sigma**2*V_xx - V_x**2 * sigma**2/xi ) - 0.4)
+
+    index1 = tf.cast(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi>=0, tf.float32)
+    index2 = tf.cast(tf.math.logical_and(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi<0, 1 + 0.4*(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) >0 ) , tf.float32)
+    index3 = tf.cast(tf.math.logical_and(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi<0, 1 + 0.4*(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) <0 ) , tf.float32)
+    
+    a = tf.zeros_like(V) * index1 + (-1/(V_x+r*sigma**2*V_xx - V_x**2 * sigma**2/xi ) - 0.4)*index2 + tf.zeros_like(V) * index3
+    
+    h = -sigma* V_x /xi * (a+0.4)
     # a = -(1+0.4*v_w+sigma**2*r*0.4*v_ww)/(v_w+r*sigma**2*v_ww)
     h_a = hh(a)
     c = tf.where(V_x < 0, (V_x/2)**2, tf.zeros((nSim_interior, 1)))
@@ -197,8 +203,13 @@ def control_a(V):
     V_x = tf.gradients(V, X_interior_tnsr)[0]
     V_xx = tf.gradients(V_x, X_interior_tnsr)[0]
     
-    a = tf.where(V_x < 0, -1/(V_x+r*sigma ** 2 * V_xx - V_x**2 *
-                 sigma**2/xi) - 0.4, -1/(V_x+r*sigma**2*V_xx) - 0.4)
+    index1 = tf.cast(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi>=0, tf.float32)
+    index2 = tf.cast(tf.math.logical_and(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi<0, 1 + 0.4*(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) >0 ) , tf.float32)
+    index3 = tf.cast(tf.math.logical_and(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi<0, 1 + 0.4*(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) <0 ) , tf.float32)
+    
+    a = tf.zeros_like(V) * index1 + (-1/(V_x+r*sigma**2*V_xx - V_x**2 * sigma**2/xi ) - 0.4)*index2 + tf.zeros_like(V) * index3
+    
+    # h = -sigma* V_x /xi * (a+0.4)
 
     return a
 
@@ -207,9 +218,13 @@ def control_h(V):
     V_x = tf.gradients(V, X_interior_tnsr)[0]
     V_xx = tf.gradients(V_x, X_interior_tnsr)[0]
     
-    a = tf.where(V_x < 0, -1/(V_x+r*sigma ** 2 * V_xx - V_x**2 *
-                 sigma**2/xi) - 0.4, -1/(V_x+r*sigma**2*V_xx) - 0.4)
-    h = tf.where(V_x < 0, -sigma* V_x /xi * (a+0.4) , tf.zeros_like(V) )
+    index1 = tf.cast(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi>=0, tf.float32)
+    index2 = tf.cast(tf.math.logical_and(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi<0, 1 + 0.4*(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) >0 ) , tf.float32)
+    index3 = tf.cast(tf.math.logical_and(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi<0, 1 + 0.4*(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) <0 ) , tf.float32)
+    
+    a = tf.zeros_like(V) * index1 + (-1/(V_x+r*sigma**2*V_xx - V_x**2 * sigma**2/xi ) - 0.4)*index2 + tf.zeros_like(V) * index3
+    
+    h = -sigma* V_x /xi * (a+0.4)
 
     return h
 
@@ -263,6 +278,12 @@ if saveOutput:
        
 #%% Plot value function results
 
+saver = tf.train.Saver()
+
+os.makedirs('./SavedNets/' + savefolder,exist_ok=True)
+
+saver.save(sess, './SavedNets/' + savefolder + saveName)
+    
 # LaTeX rendering for text in plots
 plt.style.use('classic')
 plt.rcParams["savefig.bbox"] = "tight"
@@ -316,22 +337,22 @@ axs["right top"].set_title("Effort $a(W)$")
 axs["right top"].grid(linestyle=':')
 
 axs["right mid"].plot(X_plot, fitted_c, color = 'red')
-# axs["right mid"].set_ylim(0, 1)
+axs["right mid"].set_ylim(0, 1)
 axs["right mid"].set_title("Consumption $c(W)$")
 axs["right mid"].grid(linestyle=':')
 
 axs["right down"].plot(X_plot, fitted_drift, color = 'red')
-# axs["right down"].set_ylim(0, 0.1)
+axs["right down"].set_ylim(0, 0.1)
 axs["right down"].set_title("Distorted Drift of $W$")
 axs["right down"].grid(linestyle=':')
 
 
 
 axs["right h"].plot(X_plot, fitted_h, color = 'red')
-# axs["right h"].set_ylim(0,1)
+axs["right h"].set_ylim(-1,1)
 axs["right h"].set_title("Distortion $h(W)$")
 axs["right h"].grid(linestyle=':')
-plt.savefig(figureName + '_All.pdf')
+# plt.savefig(figureName + '_All.pdf')
 
 
 if saveFigure:
