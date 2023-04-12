@@ -39,10 +39,10 @@ t_oversample = 0.5
 n_plot = 600  # Points on plot grid for each dimension
 
 # Save options
-saveOutput = False
-saveName   = 'SannikovProblem2'
+saveOutput = True
+saveName   = 'SannikovProblem2_robust_xi={}'.format(xi)
 saveFigure = False
-figureName = 'SannikovProblem'
+figureName = 'SannikovProblem_robust_xi={}'.format(xi)
 
 #%% Analytical Solution
 
@@ -65,7 +65,7 @@ def F0(w):
     return -w**2
 
 
-def h(a):
+def hh(a):
     return 1/2*a**2 + 0.4 * a
 
 
@@ -129,10 +129,18 @@ def loss(model, X_interior, X_boundary):
     
     # a = tf.where(V_x+r*sigma**2*V_xx >= 0, tf.zeros((nSim_interior, 1)), -(1+0.4*V_x+sigma**2*r*0.4*V_xx)/(V_x+r*sigma**2*V_xx))
 
-    a = tf.where(V_x < 0, -1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) -0.4, -1/(V_x+r*sigma**2*V_xx) - 0.4)
+    index1 =  tf.cast(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx <   0), tf.float32)
+    index2 = tf.cast(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx >= 0), tf.float32)
+    index3 = tf.cast(tf.math.logical_and(V_x < 0, V_x < 0), tf.float32)
+    a = (-1/(V_x+r*sigma**2*V_xx) - 0.4) * \
+        index1 + (tf.zeros_like(V)) * index2 + (-1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) - 0.4)*index3
+    # a = tf.cond(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx <   0), lambda: -1/(V_x+r*sigma**2*V_xx) - 0.4, lambda: tf.no_op())
+    # a = tf.cond(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx >=  0), lambda: -1/(V_x+r*sigma**2*V_xx) - 0.4, lambda: tf.no_op())
+    # a = tf.cond(tf.math.logical_and(V_x <  0, V_x+r*sigma**2*V_xx <   0), lambda: -1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) -0.4, lambda: tf.no_op())
+    # a = tf.where(V_x >= 0, -1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) -0.4, -1/(V_x+r*sigma**2*V_xx) - 0.4)
     h = tf.where(V_x < 0, -sigma* V_x /xi * (a+0.4) , tf.zeros_like(V) )
     # a = -(1+0.4*v_w+sigma**2*r*0.4*v_ww)/(v_w+r*sigma**2*v_ww)
-    h_a = h(a)
+    h_a = hh(a)
     c = tf.where(V_x < 0, (V_x/2)**2, tf.zeros((nSim_interior, 1)))
     u_c = u(c)
     gamma_a = gamma(a)
@@ -186,9 +194,22 @@ def control_a(V):
     V_x = tf.gradients(V, X_interior_tnsr)[0]
     V_xx = tf.gradients(V_x, X_interior_tnsr)[0]
     
-    a = tf.where(V_x+r*sigma**2*V_xx >= 0, tf.zeros(tf.shape(V)), -(1+0.4*V_x+sigma**2*r*0.4*V_xx)/(V_x+r*sigma**2*V_xx))
-    
+    a = tf.where(V_x < 0, -1/(V_x+r*sigma ** 2 * V_xx - V_x**2 *
+                 sigma**2/xi) - 0.4, -1/(V_x+r*sigma**2*V_xx) - 0.4)
+
     return a
+
+def control_h(V):
+    
+    V_x = tf.gradients(V, X_interior_tnsr)[0]
+    V_xx = tf.gradients(V_x, X_interior_tnsr)[0]
+    
+    a = tf.where(V_x < 0, -1/(V_x+r*sigma ** 2 * V_xx - V_x**2 *
+                 sigma**2/xi) - 0.4, -1/(V_x+r*sigma**2*V_xx) - 0.4)
+    h = tf.where(V_x < 0, -sigma* V_x /xi * (a+0.4) , tf.zeros_like(V) )
+
+    return h
+
 
 def control_c(V):
     # length = V.shape[0]
@@ -200,6 +221,7 @@ def control_c(V):
 
 numerical_a = control_a(V)
 numerical_c = control_c(V)
+numerical_h = control_h(V)
 
 # set optimizer - NOTE THIS IS DIFFERENT FROM OTHER APPLICATIONS!
 global_step = tf.Variable(0, trainable=False)
@@ -259,7 +281,8 @@ fig, axs = plt.subplot_mosaic(
 
 [["left column", "right top"],
 ["left column", "right mid"],
-["left column", "right down"]], figsize=(4 * figwidth, 2 * figwidth)
+["left column", "right h"],
+["left column", "right down"]], figsize=(4 * figwidth, 26)
 
 )
 
@@ -273,7 +296,9 @@ X_plot = X_plot.reshape(-1,1)
 fitted_V = sess.run([V], feed_dict= {X_interior_tnsr:X_plot})[0]
 fitted_a = sess.run([numerical_a], feed_dict= {X_interior_tnsr:X_plot})[0]
 fitted_c = sess.run([numerical_c], feed_dict= {X_interior_tnsr:X_plot})[0]
-B_W = r*(X_plot-fitted_c**(1/2)+fitted_a**2/2+2*fitted_a/5)
+fitted_h = sess.run([numerical_h], feed_dict= {X_interior_tnsr:X_plot})[0]
+B_W = r*(X_plot-fitted_c**(1/2)+fitted_a**2/2+2 *
+         fitted_a/5+(fitted_a+0.4)*sigma*fitted_h)
 fitted_drift = B_W
 
 axs["left column"].plot(X_plot, fitted_V, color = 'red')
@@ -283,20 +308,26 @@ axs["left column"].set_title("Profit $F(W)$")
 axs["left column"].grid(linestyle=':')
 
 axs["right top"].plot(X_plot, fitted_a, color = 'red')
-axs["right top"].set_ylim(0,1)
+# axs["right top"].set_ylim(0,1)
 axs["right top"].set_title("Effort $a(W)$")
 axs["right top"].grid(linestyle=':')
 
 axs["right mid"].plot(X_plot, fitted_c, color = 'red')
-axs["right mid"].set_ylim(0, 1)
+# axs["right mid"].set_ylim(0, 1)
 axs["right mid"].set_title("Consumption $c(W)$")
 axs["right mid"].grid(linestyle=':')
 
 axs["right down"].plot(X_plot, fitted_drift, color = 'red')
-axs["right down"].set_ylim(0, 0.1)
-axs["right down"].set_title("Drift of $W$")
+# axs["right down"].set_ylim(0, 0.1)
+axs["right down"].set_title("Distorted Drift of $W$")
 axs["right down"].grid(linestyle=':')
-    
+
+
+
+axs["right h"].plot(X_plot, fitted_h, color = 'red')
+# axs["right h"].set_ylim(0,1)
+axs["right h"].set_title("Distortion $h(W)$")
+axs["right h"].grid(linestyle=':')
 plt.savefig(figureName + '_All.pdf')
 
 
