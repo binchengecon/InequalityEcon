@@ -3,8 +3,8 @@
 # python_name="MollProblem_mercury_DCGM2_IneqLower.py" # 3 dmg
 # python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample.py" # 3 dmg
 # python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L1.py" # 3 dmg
-python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L1_LR.py" # 3 dmg
-# python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L2_LR.py" # 3 dmg
+# python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L1_LR.py" # 3 dmg
+python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L2_LR.py" # 3 dmg
 
 # python_name="MollProblem_mercury_DCGM2_EqLower.py" # 3 dmg
 

@@ -495,7 +495,7 @@ plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Loss.pdf',bbox_inches='
 
 
 
-pd.DataFrame(.reshape(n_plot, n_plot)).to_csv('./Figure/' +savefolder+ '/' + saveName +'_Va.csv')    
+pd.DataFrame(fitted_Va.reshape(n_plot, n_plot)).to_csv('./Figure/' +savefolder+ '/' + saveName +'_Va.csv')    
 
 
 

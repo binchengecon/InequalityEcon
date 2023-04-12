@@ -309,7 +309,7 @@ for i in range(sampling_stages):
 os.makedirs('./SavedNets/' +savefolder+ '/', exist_ok=True)
 # if saveOutput:
 saver = tf.train.Saver()
-saver.save(sess, './SavedNets/' +savefolder+ '/' + saveName)
+saver.save(sess, './SavedNets/' +savefolder+ '/' + saveName, global_step=1000)
        
 # Plot value function results
 model.summary()
@@ -490,7 +490,7 @@ plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Loss.pdf',bbox_inches='
 
 
 
-pd.DataFrame(.reshape(n_plot, n_plot)).to_csv('./Figure/' +savefolder+ '/' + saveName +'_Va.csv')    
+pd.DataFrame(fitted_Va.reshape(n_plot, n_plot)).to_csv('./Figure/' +savefolder+ '/' + saveName +'_Va.csv')    
 
 
 
