@@ -3,8 +3,8 @@
 # python_name="MollProblem_mercury_DCGM2_IneqLower.py" # 3 dmg
 # python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample.py" # 3 dmg
 # python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L1.py" # 3 dmg
-# python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L1_LR.py" # 3 dmg
-python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L2_LR.py" # 3 dmg
+python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L1_LR.py" # 3 dmg
+# python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L2_LR.py" # 3 dmg
 
 # python_name="MollProblem_mercury_DCGM2_EqLower.py" # 3 dmg
 
@@ -26,7 +26,8 @@ nodes_per_layer_arr=(40 50 60)
 # nodes_per_layer_arr=(20 30 40 50)
 
 
-sampling_stages_arr=(80000)
+# sampling_stages_arr=(80000)
+sampling_stages_arr=(60000)
 steps_per_sample_arr=(10)
 
 # nSim_interior_arr=(2048)
@@ -36,8 +37,8 @@ steps_per_sample_arr=(10)
 # nSim_interior_arr=(128)
 # nSim_boundary_arr=(32)
 
-nSim_interior_arr=(192)
-nSim_boundary_arr=(48)
+nSim_interior_arr=(128)
+nSim_boundary_arr=(32)
 
 LearningRate_arr=(0.001 0.0001 0.00001)
 

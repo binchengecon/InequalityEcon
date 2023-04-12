@@ -356,7 +356,7 @@ ax.set_ylabel('$z$')
 # ax.set_zlabel('$v(a,z)$')
 # ax.set_title('Deep Learning Solution')
 
-plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Value.png',bbox_inches='tight')
+plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Value.pdf',bbox_inches='tight')
 
 
 Moll_V = pd.read_csv("./MollData/V.csv", header = None)
@@ -370,7 +370,7 @@ ax.set_ylabel('$z$')
 # ax.set_zlabel('$v(a,z)$')
 # ax.set_title('Deep Learning Solution')
 
-plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_ValueDiff.png',bbox_inches='tight')
+plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_ValueDiff.pdf',bbox_inches='tight')
 
 
 # # Surface plot of solution u(t,x)
@@ -384,7 +384,7 @@ ax.set_ylabel('$z$')
 # ax.set_title('Deep Learning Solution')
 
 
-plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Consumption.png',bbox_inches='tight')
+plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Consumption.pdf',bbox_inches='tight')
 
 
 # # Surface plot of solution u(t,x)
@@ -397,7 +397,7 @@ ax.set_ylabel('$z$')
 ax.set_zlim(0.75,1.10)
 # ax.set_title('$\partial V / \partial a$')
 # ax.set_title('Deep Learning Solution')
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Va.png',bbox_inches='tight')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Va.pdf',bbox_inches='tight')
 
 Moll_Va = pd.read_csv("./MollData/Va_Upwind.csv", header = None)
 
@@ -409,7 +409,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 # ax.set_title('$\partial V / \partial a$')
 # ax.set_title('Deep Learning Solution')
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaDiffUpwind.png',bbox_inches='tight')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaDiffUpwind.pdf',bbox_inches='tight')
 
 Moll_Vacenter = pd.read_csv("./MollData/Va_center.csv", header = None)
 
@@ -422,7 +422,7 @@ ax.set_ylabel('$z$')
 # ax.set_zlabel('$\partial V / \partial a$')
 ax.set_zlabel('Difference')
 # ax.set_title('Deep Learning Solution')
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaDiffCenter.png',bbox_inches='tight')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaDiffCenter.pdf',bbox_inches='tight')
 
 
 
@@ -435,7 +435,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 # ax.set_zlabel('$V_aa$')
 # ax.set_title('$\partial^2 V / \partial a^2$')
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vaa.png',bbox_inches='tight')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vaa.pdf',bbox_inches='tight')
 
 
 # # Surface plot of solution u(t,x)
@@ -447,7 +447,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 # ax.set_title('$\partial V / \partial z$')
 # ax.set_title('Deep Learning Solution')
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vz.png',bbox_inches='tight')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vz.pdf',bbox_inches='tight')
 
 
 Moll_Vz = pd.read_csv("./MollData/Vz.csv", header = None)
@@ -464,7 +464,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 # ax.set_title('$\partial V / \partial z$')
 # ax.set_title('Deep Learning Solution')
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VzDiff.png',bbox_inches='tight')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VzDiff.pdf',bbox_inches='tight')
 
 
 # # Surface plot of solution u(t,x)
@@ -476,7 +476,7 @@ ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
 # ax.set_zlabel('$V_aa$')
 ax.set_title('$\partial^2 V / \partial z^2$')
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vzz.png',bbox_inches='tight')
+plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_Vzz.pdf',bbox_inches='tight')
 
 
 #
@@ -486,4 +486,26 @@ ax.semilogy(range(len(loss_list)), loss_list, 'k-')
 ax.set_xlabel('$n_{epoch}$')
 ax.set_ylabel('$\\phi^{n_{epoch}}$')
 # if saveFigure:
-plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Loss.png',bbox_inches='tight')
+plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Loss.pdf',bbox_inches='tight')
+
+
+
+pd.DataFrame(.reshape(n_plot, n_plot)).to_csv('./Figure/' +savefolder+ '/' + saveName +'_Va.csv')    
+
+
+
+# plt.style.use('classic')
+# plt.rcParams["savefig.bbox"] = "tight"
+# plt.rcParams["font.size"] = 16
+# plt.rcParams['text.usetex']=True
+
+
+# fig = plt.figure(figsize=(16, 9))
+# plt.plot(Z[:, 0], fitted_Va.reshape(n_plot, n_plot)[:,0], label=r'$\partial_a v( \underline a,z)$: NN', color='black')
+# # plt.plot(Z[:,0], Moll_Va[:,0],label='$\partial_a v(a,z)$: Upwind')
+# plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+#          label=r'$u^\prime(z + r \underline a )$', color='red')
+# plt.xlabel('$z$')
+# plt.ylim(0.75, 1.10)
+# plt.legend()
+# plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_VaSlice.pdf', bbox_inches='tight')
