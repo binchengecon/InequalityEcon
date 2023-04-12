@@ -131,9 +131,12 @@ def loss(model, X_interior, X_boundary):
 
     index1 =  tf.cast(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx <   0), tf.float32)
     index2 = tf.cast(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx >= 0), tf.float32)
-    index3 = tf.cast(tf.math.logical_and(V_x < 0, V_x < 0), tf.float32)
+    index3 = tf.cast(tf.math.logical_and(
+        V_x < 0, 1 + 0.4 * (V_x+r*sigma ** 2 * V_xx - V_x**2 * sigma**2/xi) > 0) , tf.float32)
+    index4 = tf.cast(tf.math.logical_and(
+        V_x < 0, 1 + 0.4 * (V_x+r*sigma ** 2 * V_xx - V_x**2 * sigma**2/xi)<= 0) , tf.float32)
     a = (-1/(V_x+r*sigma**2*V_xx) - 0.4) * \
-        index1 + (tf.zeros_like(V)) * index2 + (-1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) - 0.4)*index3
+        index1 + (tf.zeros_like(V)) * index2 + (-1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) - 0.4)*index3 + (tf.zeros_like(V)) * index4
     # a = tf.cond(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx <   0), lambda: -1/(V_x+r*sigma**2*V_xx) - 0.4, lambda: tf.no_op())
     # a = tf.cond(tf.math.logical_and(V_x >= 0, V_x+r*sigma**2*V_xx >=  0), lambda: -1/(V_x+r*sigma**2*V_xx) - 0.4, lambda: tf.no_op())
     # a = tf.cond(tf.math.logical_and(V_x <  0, V_x+r*sigma**2*V_xx <   0), lambda: -1/(V_x+r*sigma **2 * V_xx - V_x**2 * sigma**2/xi) -0.4, lambda: tf.no_op())
