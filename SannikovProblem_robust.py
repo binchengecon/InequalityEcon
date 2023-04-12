@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 # Sannikov problem parameters 
 r = 0.1
 sigma = 1
-xi = 1
+xi = 1000
 # Solution parameters (domain on which to solve PDE)
 X_low = 0.0  # wealth lower bound
 X_high = 1           # wealth upper bound
