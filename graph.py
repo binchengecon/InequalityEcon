@@ -91,7 +91,7 @@ plt.rcParams['text.usetex']=True
 # plt.rcParams["lines.linewidth"] = 5
 
 fig = plt.figure(figsize=(16, 9))
-plt.plot(Z[:, 0], Moll_Vacenter[:, 0], label=r'$\partial_a^F v( \underline a,z)$', color='black')
+plt.plot(Z[:, 0], Moll_Vacenter[:, 0], label=r'$\partial_a^{Forward} v( \underline a,z)$', color='black')
 # plt.plot(Z[:,0], Moll_Va[:,0],label='$\partial_a v(a,z)$: Upwind')
 plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
          label=r'$u^\prime(z + r \underline a )$', color='red')
@@ -109,7 +109,7 @@ plt.savefig('./MollData/Va_analysis_FB2.pdf', bbox_inches='tight')
 
 fig = plt.figure(figsize=(16, 9))
 # plt.plot(Z[:,0], Moll_Vacenter[:,0],label='$\partial_a v(a,z)$: Forward')
-plt.plot(Z[:,0], Moll_Va[:,0],label=r'$\partial_a v( \underline a,z)$: Upwind', color='black')
+plt.plot(Z[:,0], Moll_Va[:,0],label=r'$\partial_a^{Upwind} v( \underline a,z)$', color='black')
 # plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]), label=r'$u^\prime(z + r \underline{a})$')
 plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
          label=r'$u^\prime(z + r \underline a )$', color='red')
