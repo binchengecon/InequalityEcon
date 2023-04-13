@@ -1,11 +1,11 @@
 #! /bin/bash
 
 
-# python_name="SannikovProblem_noretirement_mercury_robust.py" # 3 dmg
-python_name="SannikovProblem_retirement_mercury_robust.py" # 3 dmg
+python_name="SannikovProblem_noretirement_mercury_robust.py" # 3 dmg
+# python_name="SannikovProblem_retirement_mercury_robust.py" # 3 dmg
 
 
-xiarr=(1 5 10 50 100 1000)
+xiarr=(1 5 10 50 100 1000 1000000)
 
 count=0
 
