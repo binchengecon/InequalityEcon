@@ -267,18 +267,18 @@ sess.run(init_op)
 loss_list = []
 
 # for each sampling stage
-for i in range(sampling_stages):
+# for i in range(sampling_stages):
     
-    # sample uniformly from the required regions
-    X_interior, X_boundary = sampler(nSim_interior, nSim_boundary)
+#     # sample uniformly from the required regions
+#     X_interior, X_boundary = sampler(nSim_interior, nSim_boundary)
     
-    # for a given sample, take the required number of SGD steps
-    for _ in range(steps_per_sample):
-        loss,L1,L2,_ = sess.run([loss_tnsr, L1_tnsr, L2_tnsr, optimizer],
-                                feed_dict = {X_interior_tnsr:X_interior, X_boundary_tnsr:X_boundary})
-        loss_list.append(loss)
+#     # for a given sample, take the required number of SGD steps
+#     for _ in range(steps_per_sample):
+#         loss,L1,L2,_ = sess.run([loss_tnsr, L1_tnsr, L2_tnsr, optimizer],
+#                                 feed_dict = {X_interior_tnsr:X_interior, X_boundary_tnsr:X_boundary})
+#         loss_list.append(loss)
     
-    print(loss, L1, L2, i)
+#     print(loss, L1, L2, i)
 os.makedirs('./SavedNets/' + savefolder,exist_ok=True)
 
 # save outout
@@ -292,8 +292,8 @@ saver = tf.train.Saver()
 
 os.makedirs('./SavedNets/' + savefolder,exist_ok=True)
 
-saver.save(sess, './SavedNets/' + savefolder + saveName)
-# saver.restore(sess, './SavedNets' + savefolder + saveName)
+# saver.save(sess, './SavedNets/' + savefolder + saveName)
+saver.restore(sess, './SavedNets' + savefolder + saveName)
 # saver.restore(sess, "C:/Users/33678/InequalityEcon/SavedNets/robust_xi=5/SannikovProblem2")
     
 # LaTeX rendering for text in plots
@@ -341,18 +341,18 @@ fitted_drift = B_W
 fitted_drift_true = B_W_True
 
 axs["left column"].plot(X_plot, fitted_V, color = 'red')
-# axs["left column"].set_ylim(-1,1)
+axs["left column"].set_ylim(-1,0.5)
 axs["left column"].plot(X_plot, F0(X_plot), color = 'black')
 axs["left column"].set_title("Profit $F(W)$")
 axs["left column"].grid(linestyle=':')
 
 axs["right top"].plot(X_plot, fitted_a, color = 'red')
-# axs["right top"].set_ylim(0,1)
+axs["right top"].set_ylim(0,0.8)
 axs["right top"].set_title("Effort $\\alpha(W)$")
 axs["right top"].grid(linestyle=':')
 
 axs["right mid"].plot(X_plot, fitted_c, color = 'red')
-# axs["right mid"].set_ylim(0, 1)
+axs["right mid"].set_ylim(0, 0.4)
 axs["right mid"].set_title("Consumption $\\pi(W)$")
 axs["right mid"].grid(linestyle=':')
 
@@ -362,12 +362,12 @@ axs["right mid"].grid(linestyle=':')
 # axs["left down"].grid(linestyle=':')
 
 axs["right h"].plot(X_plot, fitted_h, color = 'red')
-# axs["right h"].set_ylim(-1,1)
+axs["right h"].set_ylim(0,0.6)
 axs["right h"].set_title("Distortion $h(W)$")
 axs["right h"].grid(linestyle=':')
 
 axs["right down"].plot(X_plot, fitted_drift, color = 'red')
-# axs["right down"].set_ylim(-0.1, 0.1)
+axs["right down"].set_ylim(0, 0.1)
 axs["right down"].set_title("Distorted Drift of $W$")
 axs["right down"].grid(linestyle=':')
 
