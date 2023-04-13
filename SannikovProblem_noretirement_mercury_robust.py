@@ -52,7 +52,7 @@ saveOutput = False
 savefolder = '/mercury_noretirement_robust_xi={}/'.format(xi)
 saveName   = 'SannikovProblem2'
 saveFigure = False
-figureName = 'SannikovProblem2'
+figureName = 'SannikovProblem2_xi={}'.format(xi)
 
 #%% Analytical Solution
 
@@ -341,18 +341,18 @@ fitted_drift = B_W
 fitted_drift_true = B_W_True
 
 axs["left column"].plot(X_plot, fitted_V, color = 'red')
-axs["left column"].set_ylim(-1,1)
+# axs["left column"].set_ylim(-1,1)
 axs["left column"].plot(X_plot, F0(X_plot), color = 'black')
 axs["left column"].set_title("Profit $F(W)$")
 axs["left column"].grid(linestyle=':')
 
 axs["right top"].plot(X_plot, fitted_a, color = 'red')
-axs["right top"].set_ylim(0,1)
+# axs["right top"].set_ylim(0,1)
 axs["right top"].set_title("Effort $\\alpha(W)$")
 axs["right top"].grid(linestyle=':')
 
 axs["right mid"].plot(X_plot, fitted_c, color = 'red')
-axs["right mid"].set_ylim(0, 1)
+# axs["right mid"].set_ylim(0, 1)
 axs["right mid"].set_title("Consumption $\\pi(W)$")
 axs["right mid"].grid(linestyle=':')
 
@@ -362,17 +362,18 @@ axs["right mid"].grid(linestyle=':')
 # axs["left down"].grid(linestyle=':')
 
 axs["right h"].plot(X_plot, fitted_h, color = 'red')
-axs["right h"].set_ylim(-1,1)
+# axs["right h"].set_ylim(-1,1)
 axs["right h"].set_title("Distortion $h(W)$")
 axs["right h"].grid(linestyle=':')
 
 axs["right down"].plot(X_plot, fitted_drift, color = 'red')
-axs["right down"].set_ylim(-0.1, 0.1)
+# axs["right down"].set_ylim(-0.1, 0.1)
 axs["right down"].set_title("Distorted Drift of $W$")
 axs["right down"].grid(linestyle=':')
 
+os.makedirs('./Figure/' +savefolder,exist_ok=True)
 
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_All.pdf')
+plt.savefig('./Figure/' +savefolder+  figureName + '_All.pdf')
 
 Fitted_matrix = np.zeros((n_plot,6))
 Fitted_matrix[:,:1] = X_plot
@@ -381,7 +382,6 @@ Fitted_matrix[:,2:3] = fitted_a
 Fitted_matrix[:,3:4] = fitted_c
 Fitted_matrix[:,4:5] = fitted_h
 Fitted_matrix[:,5:6] = fitted_drift
-os.makedirs('./Figure/' +savefolder,exist_ok=True)
 pd.DataFrame(Fitted_matrix).to_csv('./Figure/' +savefolder+ figureName +'_All.csv',header=False,index=False)    
 
 if saveFigure:
@@ -396,7 +396,7 @@ ax.semilogy(range(len(loss_list)), loss_list, 'k-')
 ax.set_xlabel('$n_{epoch}$')
 ax.set_ylabel('$\\phi^{n_{epoch}}$')
 
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_LossList.pdf')
+plt.savefig('./Figure/' +savefolder+ '/' + figureName + '_LossList.pdf')
 
 if saveFigure:
     plt.savefig(figureName + '_LossList.pdf')   

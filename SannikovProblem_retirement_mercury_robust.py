@@ -52,7 +52,7 @@ saveOutput = False
 savefolder = '/mercury_retirement_robust_xi={}/'.format(xi)
 saveName   = 'SannikovProblem2'
 saveFigure = False
-figureName = 'SannikovProblem2'
+figureName = 'SannikovProblem2_xi={}'.format(xi)
 
 #%% Analytical Solution
 
@@ -372,7 +372,7 @@ axs["right down"].grid(linestyle=':')
 
 os.makedirs('./Figure/' +savefolder,exist_ok=True)
 
-plt.savefig('./Figure/' +savefolder+ '/' + saveName + '_All.pdf')
+plt.savefig('./Figure/' +savefolder+ figureName + '_All.pdf')
 
 Fitted_matrix = np.zeros((n_plot,6))
 Fitted_matrix[:,:1] = X_plot
@@ -381,7 +381,7 @@ Fitted_matrix[:,2:3] = fitted_a
 Fitted_matrix[:,3:4] = fitted_c
 Fitted_matrix[:,4:5] = fitted_h
 Fitted_matrix[:,5:6] = fitted_drift
-pd.DataFrame(Fitted_matrix).to_csv('./Figure/' +savefolder+ '/' + saveName +'_All.csv',header=False,index=False)    
+pd.DataFrame(Fitted_matrix).to_csv('./Figure/' +savefolder + figureName +'_All.csv',header=False,index=False)    
 
 if saveFigure:
     plt.savefig(figureName + '_All.pdf')
@@ -395,7 +395,7 @@ ax.semilogy(range(len(loss_list)), loss_list, 'k-')
 ax.set_xlabel('$n_{epoch}$')
 ax.set_ylabel('$\\phi^{n_{epoch}}$')
 
-plt.savefig(figureName + '_LossList.pdf')
+plt.savefig('./Figure/' +savefolder+ figureName + '_LossList.pdf')
 
 if saveFigure:
     plt.savefig(figureName + '_LossList.pdf')   
