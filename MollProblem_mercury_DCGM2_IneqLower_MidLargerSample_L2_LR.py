@@ -309,7 +309,7 @@ for i in range(sampling_stages):
 os.makedirs('./SavedNets/' +savefolder+ '/', exist_ok=True)
 # if saveOutput:
 saver = tf.train.Saver()
-saver.save(sess, './SavedNets/' +savefolder+ '/' + saveName, global_step=1000)
+saver.save(sess, './SavedNets/' +savefolder+ '/' + saveName)
        
 # Plot value function results
 model.summary()

@@ -1,0 +1,2 @@
+model_checkpoint_path: "MollProblem-1000"
+all_model_checkpoint_paths: "MollProblem-1000"
