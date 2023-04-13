@@ -8,13 +8,13 @@ tf.disable_v2_behavior()
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-
+import pandas as pd
 #%% Parameters 
 
 # Sannikov problem parameters 
 r = 0.1
 sigma = 1
-xi = 1
+xi = 5
 # Solution parameters (domain on which to solve PDE)
 X_low = 0.0  # wealth lower bound
 X_high = 1           # wealth upper bound
@@ -40,7 +40,7 @@ t_oversample = 0.5
 n_plot = 600  # Points on plot grid for each dimension
 
 # Save options
-saveOutput = True
+saveOutput = False
 savefolder = '/robust_xi={}/'.format(xi)
 saveName   = 'SannikovProblem2'
 saveFigure = False
@@ -270,11 +270,12 @@ for i in range(sampling_stages):
         loss_list.append(loss)
     
     print(loss, L1, L2, i)
+os.makedirs('./SavedNets/' + savefolder,exist_ok=True)
 
 # save outout
-if saveOutput:
-    saver = tf.train.Saver()
-    saver.save(sess, './SavedNets/' + saveName)
+# if saveOutput:
+#     saver = tf.train.Saver()
+#     saver.save(sess, './SavedNets/' + savefolder + saveName)
        
 #%% Plot value function results
 
@@ -283,6 +284,8 @@ saver = tf.train.Saver()
 os.makedirs('./SavedNets/' + savefolder,exist_ok=True)
 
 saver.save(sess, './SavedNets/' + savefolder + saveName)
+# saver.restore(sess, './SavedNets' + savefolder + saveName)
+# saver.restore(sess, "C:/Users/33678/InequalityEcon/SavedNets/robust_xi=5/SannikovProblem2")
     
 # LaTeX rendering for text in plots
 plt.style.use('classic')
@@ -306,7 +309,7 @@ fig, axs = plt.subplot_mosaic(
 [["left column", "right top"],
 ["left column", "right mid"],
 ["left column", "right h"],
-["left column", "right down"]], figsize=(4 * figwidth, 26)
+ ["left column", "right down"]], figsize=(4 * figwidth, 26)
 
 )
 
@@ -323,7 +326,10 @@ fitted_c = sess.run([numerical_c], feed_dict= {X_interior_tnsr:X_plot})[0]
 fitted_h = sess.run([numerical_h], feed_dict= {X_interior_tnsr:X_plot})[0]
 B_W = r*(X_plot-fitted_c**(1/2)+fitted_a**2/2+2 *
          fitted_a/5+(fitted_a+0.4)*sigma*fitted_h)
+B_W_True = r*(X_plot-fitted_c**(1/2)+fitted_a**2/2+2 *
+         fitted_a/5)
 fitted_drift = B_W
+fitted_drift_true = B_W_True
 
 axs["left column"].plot(X_plot, fitted_V, color = 'red')
 axs["left column"].set_ylim(-1,0.15)
@@ -332,28 +338,42 @@ axs["left column"].set_title("Profit $F(W)$")
 axs["left column"].grid(linestyle=':')
 
 axs["right top"].plot(X_plot, fitted_a, color = 'red')
-# axs["right top"].set_ylim(0,1)
-axs["right top"].set_title("Effort $a(W)$")
+axs["right top"].set_ylim(0,1)
+axs["right top"].set_title("Effort $\\alpha(W)$")
 axs["right top"].grid(linestyle=':')
 
 axs["right mid"].plot(X_plot, fitted_c, color = 'red')
 axs["right mid"].set_ylim(0, 1)
-axs["right mid"].set_title("Consumption $c(W)$")
+axs["right mid"].set_title("Consumption $\\pi(W)$")
 axs["right mid"].grid(linestyle=':')
 
-axs["right down"].plot(X_plot, fitted_drift, color = 'red')
-axs["right down"].set_ylim(0, 0.1)
-axs["right down"].set_title("Distorted Drift of $W$")
-axs["right down"].grid(linestyle=':')
-
-
+# axs["left down"].plot(X_plot, fitted_drift_true, color = 'red')
+# # axs["right down"].set_ylim(0, 0.1)
+# axs["left down"].set_title("True Drift of $W$")
+# axs["left down"].grid(linestyle=':')
 
 axs["right h"].plot(X_plot, fitted_h, color = 'red')
 axs["right h"].set_ylim(-1,1)
 axs["right h"].set_title("Distortion $h(W)$")
 axs["right h"].grid(linestyle=':')
+
+axs["right down"].plot(X_plot, fitted_drift, color = 'red')
+axs["right down"].set_ylim(-0.1, 0.1)
+axs["right down"].set_title("Distorted Drift of $W$")
+axs["right down"].grid(linestyle=':')
+
+
 # plt.savefig(figureName + '_All.pdf')
 
+Fitted_matrix = np.zeros((n_plot,6))
+Fitted_matrix[:,:1] = X_plot
+Fitted_matrix[:,1:2] = fitted_V
+Fitted_matrix[:,2:3] = fitted_a
+Fitted_matrix[:,3:4] = fitted_c
+Fitted_matrix[:,4:5] = fitted_h
+Fitted_matrix[:,5:6] = fitted_drift
+# os.makedirs('./Figure/' +savefolder+ '/',exist_ok=True)
+pd.DataFrame(Fitted_matrix).to_csv('./'+ figureName +'_All.csv',header=False,index=False)    
 
 if saveFigure:
     plt.savefig(figureName + '_All.pdf')

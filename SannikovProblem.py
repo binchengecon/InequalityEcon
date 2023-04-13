@@ -7,6 +7,8 @@ import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+
 
 #%% Parameters 
 
@@ -40,6 +42,8 @@ n_plot = 600  # Points on plot grid for each dimension
 
 # Save options
 saveOutput = False
+
+savefolder = '/baseline/'
 saveName   = 'SannikovProblem2'
 saveFigure = False
 figureName = 'SannikovProblem'
@@ -235,7 +239,12 @@ if saveOutput:
     saver.save(sess, './SavedNets/' + saveName)
        
 #%% Plot value function results
+saver = tf.train.Saver()
 
+os.makedirs('./SavedNets/' + savefolder,exist_ok=True)
+
+saver.save(sess, './SavedNets/' + savefolder + saveName)
+    
 # LaTeX rendering for text in plots
 plt.style.use('classic')
 plt.rcParams["savefig.bbox"] = "tight"
@@ -282,12 +291,12 @@ axs["left column"].grid(linestyle=':')
 
 axs["right top"].plot(X_plot, fitted_a, color = 'red')
 axs["right top"].set_ylim(0,1)
-axs["right top"].set_title("Effort $a(W)$")
+axs["right top"].set_title("Effort $\\alpha(W)$")
 axs["right top"].grid(linestyle=':')
 
 axs["right mid"].plot(X_plot, fitted_c, color = 'red')
 axs["right mid"].set_ylim(0, 1)
-axs["right mid"].set_title("Consumption $c(W)$")
+axs["right mid"].set_title("Consumption $\\pi(W)$")
 axs["right mid"].grid(linestyle=':')
 
 axs["right down"].plot(X_plot, fitted_drift, color = 'red')
