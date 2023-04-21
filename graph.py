@@ -134,16 +134,92 @@ plt.rcParams['text.usetex']=True
 # plt.rcParams["legend.frameon"] = True
 # plt.rcParams["lines.linewidth"] = 5
 
+# fig = plt.figure(figsize=(16, 9))
+# # plt.plot(Z[:,0], Moll_Vacenter[:,0],label='$\partial_a v(a,z)$: Forward')
+# plt.plot(Z[:, 0], Moll_Va_NN.reshape(n_plot, n_plot)[:, 0],
+#          label=r'$\partial_a^{NN} v( \underline a,z)$', color='black')
+# # plt.plot(Z[:,0], Moll_Va[:,0],label=r'$\partial_a^{Upwind} v( \underline a,z)$', color='black')
+# plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+#          label=r'$u^\prime(z + r \underline a )$', color='red')
+# # plt.view_init(35, 35)
+# plt.xlabel('$z$')
+# # plt.ylim(0.75, 1.10)
+# plt.legend()
+
+# plt.savefig('./MollData/Va_slice.pdf', bbox_inches='tight')
+
+
+Moll_Vaforward400 = pd.read_csv("./MollData/Va_f_400_40.csv", header= None)
+Moll_Vaforward4000 = pd.read_csv("./MollData/Va_f_4000_40.csv", header= None)
+Moll_Vaforward40000 = pd.read_csv("./MollData/Va_f_40000_40.csv", header= None)
+Moll_Vaforward400 = np.array(Moll_Vaforward400)
+Moll_Vaforward4000 = np.array(Moll_Vaforward4000)
+Moll_Vaforward40000 = np.array(Moll_Vaforward40000)
+
+aspace = np.linspace(-0.02, 4, 400)
+zspace = np.linspace(zmean*0.8, zmean*1.2, 40)
+A, Z = np.meshgrid(aspace, zspace)
+
 fig = plt.figure(figsize=(16, 9))
-# plt.plot(Z[:,0], Moll_Vacenter[:,0],label='$\partial_a v(a,z)$: Forward')
-plt.plot(Z[:, 0], Moll_Va_NN.reshape(n_plot, n_plot)[:, 0],
-         label=r'$\partial_a^{NN} v( \underline a,z)$', color='black')
-# plt.plot(Z[:,0], Moll_Va[:,0],label=r'$\partial_a^{Upwind} v( \underline a,z)$', color='black')
+plt.plot(Z[:, 0], Moll_Vaforward400[:, 0],
+         label=r'$\partial_a^{Forward} v( \underline a,z)$', color='black')
+# plt.plot(Z[:,0], Moll_Va[:,0],label='$\partial_a v(a,z)$: Upwind')
 plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
          label=r'$u^\prime(z + r \underline a )$', color='red')
+# plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+#          label=r'$u^\prime(z + r a)$', color = 'red')
 # plt.view_init(35, 35)
 plt.xlabel('$z$')
-# plt.ylim(0.75, 1.10)
+plt.ylim(0.75, 1.10)
 plt.legend()
+# plt.show()
+# ax.set_zlabel('$\partial V / \partial a$')
+# ax.set_zlabel('Difference')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./MollData/Va_analysis_FB2_400.pdf', bbox_inches='tight')
 
-plt.savefig('./MollData/Va_slice.pdf', bbox_inches='tight')
+
+aspace = np.linspace(-0.02, 4, 4000)
+zspace = np.linspace(zmean*0.8, zmean*1.2, 40)
+A, Z = np.meshgrid(aspace, zspace)
+
+fig = plt.figure(figsize=(16, 9))
+plt.plot(Z[:, 0], Moll_Vaforward4000[:, 0],
+         label=r'$\partial_a^{Forward} v( \underline a,z)$', color='black')
+# plt.plot(Z[:,0], Moll_Va[:,0],label='$\partial_a v(a,z)$: Upwind')
+plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+         label=r'$u^\prime(z + r \underline a )$', color='red')
+# plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+#          label=r'$u^\prime(z + r a)$', color = 'red')
+# plt.view_init(35, 35)
+plt.xlabel('$z$')
+plt.ylim(0.75, 1.10)
+plt.legend()
+# plt.show()
+# ax.set_zlabel('$\partial V / \partial a$')
+# ax.set_zlabel('Difference')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./MollData/Va_analysis_FB2_4000.pdf', bbox_inches='tight')
+
+
+aspace = np.linspace(-0.02, 4, 40000)
+zspace = np.linspace(zmean*0.8, zmean*1.2, 40)
+A, Z = np.meshgrid(aspace, zspace)
+
+fig = plt.figure(figsize=(16, 9))
+plt.plot(Z[:, 0], Moll_Vaforward40000[:, 0],
+         label=r'$\partial_a^{Forward} v( \underline a,z)$', color='black')
+# plt.plot(Z[:,0], Moll_Va[:,0],label='$\partial_a v(a,z)$: Upwind')
+plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+         label=r'$u^\prime(z + r \underline a )$', color='red')
+# plt.plot(Z[:, 0], u_deriv(Z[:, 0]+r*A[:, 0]),
+#          label=r'$u^\prime(z + r a)$', color = 'red')
+# plt.view_init(35, 35)
+plt.xlabel('$z$')
+plt.ylim(0.75, 1.10)
+plt.legend()
+# plt.show()
+# ax.set_zlabel('$\partial V / \partial a$')
+# ax.set_zlabel('Difference')
+# ax.set_title('Deep Learning Solution')
+plt.savefig('./MollData/Va_analysis_FB2_40000.pdf', bbox_inches='tight')
