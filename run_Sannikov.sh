@@ -1,8 +1,9 @@
 #! /bin/bash
 
 
-python_name="SannikovProblem_noretirement_mercury_robust.py" # 3 dmg
+# python_name="SannikovProblem_noretirement_mercury_robust.py" # 3 dmg
 # python_name="SannikovProblem_retirement_mercury_robust.py" # 3 dmg
+python_name="SannikovProblem_noretirement_mercury_robust_wider.py" # 3 dmg
 
 
 xiarr=(1 5 10 50 100 1000 1000000)
@@ -36,7 +37,7 @@ for xi in ${xiarr[@]}; do
 #SBATCH --partition=caslake
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=5G
-#SBATCH --time=1-00:00:00
+#SBATCH --time=1-12:00:00
 ##SBATCH --exclude=mcn53,mcn51,mcn05
 
 ####### load modules

@@ -292,7 +292,7 @@ for i in range(sampling_stages):
     
     # sample uniformly from the required regions
     if i>sampling_stages/2:
-        a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_SC_lower, z_SC_lower = sampler(nSim_interior*20, nSim_boundary*20)
+        a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_SC_lower, z_SC_lower = sampler(nSim_interior*10, nSim_boundary*10)
     else:
         a_interior, z_interior, a_NBC, z_NBC, a_SC_upper, z_SC_upper, a_SC_lower, z_SC_lower = sampler(nSim_interior, nSim_boundary)
     
@@ -490,7 +490,7 @@ plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Loss.pdf',bbox_inches='
 
 
 
-pd.DataFrame(fitted_Va.reshape(n_plot, n_plot)).to_csv('./Figure/' +savefolder+ '/' + saveName +'_Va.csv')    
+pd.DataFrame(fitted_Va.reshape(n_plot, n_plot)).to_csv('./Figure/' +savefolder+ '/' + saveName +'_Va.csv',header=False,index=False)    
 
 
 

@@ -9,8 +9,8 @@ python_name="MollProblem_mercury_DCGM2_IneqLower_MidLargerSample_L2_LR.py" # 3 d
 # python_name="MollProblem_mercury_DCGM2_EqLower.py" # 3 dmg
 
 
-num_layers_FFNN_arr=(0 2 3 4)
-activation_FFNN_arr=("tanh" "relu")
+num_layers_FFNN_arr=(0)
+activation_FFNN_arr=("tanh")
 num_layers_RNN_arr=(3)
 
 # # nodes_per_layer_arr=(40 50 60)
@@ -22,12 +22,13 @@ num_layers_RNN_arr=(3)
 # activation_FFNN_arr=("tanh" "relu")
 # num_layers_RNN_arr=(0)
 
-nodes_per_layer_arr=(40 50 60)
+# nodes_per_layer_arr=(40 50 60)
+nodes_per_layer_arr=(50)
 # nodes_per_layer_arr=(20 30 40 50)
 
 
 # sampling_stages_arr=(80000)
-sampling_stages_arr=(60000)
+sampling_stages_arr=(100000)
 steps_per_sample_arr=(10)
 
 # nSim_interior_arr=(2048)
@@ -40,7 +41,7 @@ steps_per_sample_arr=(10)
 nSim_interior_arr=(128)
 nSim_boundary_arr=(32)
 
-LearningRate_arr=(0.001 0.0001 0.00001)
+LearningRate_arr=(0.001)
 
 
 LENGTH_layers=$((${#num_layers_arr[@]} - 1))
