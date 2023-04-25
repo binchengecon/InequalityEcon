@@ -378,7 +378,7 @@ class DCGM3Net(tf.keras.Model):
         '''
 
         # create an instance of a Model object (call initialize function of superclass of DGMNet)
-        super(DCGM2Net, self).__init__()
+        super(DCGM3Net, self).__init__()
 
         # define initial layer as fully connected
         # NOTE: to account for time inputs we use input_dim+1 as the input dimensionality
