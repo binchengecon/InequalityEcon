@@ -16,14 +16,14 @@ import pandas as pd
 
 
 parser = argparse.ArgumentParser(description="xi_r values")
-parser.add_argument("--num_layers_FFNN", type=int)
+parser.add_argument("--num_layers_FFNN", type=int, default=0)
 parser.add_argument("--activation_FFNN", type=str, default = "tanh")
-parser.add_argument("--num_layers_RNN", type=int)
-parser.add_argument("--nodes_per_layer", type=int)
-parser.add_argument("--sampling_stages", type=int)
-parser.add_argument("--steps_per_sample", type=int)
-parser.add_argument("--nSim_interior", type=int)
-parser.add_argument("--nSim_boundary", type=int)
+parser.add_argument("--num_layers_RNN", type=int, default=3)
+parser.add_argument("--nodes_per_layer", type=int, default=50)
+parser.add_argument("--sampling_stages", type=int, default=1000)
+parser.add_argument("--steps_per_sample", type=int, default=10)
+parser.add_argument("--nSim_interior", type=int, default=1000)
+parser.add_argument("--nSim_boundary", type=int, default=64)
 # args = parser.parse_args()
 args, unknown = parser.parse_known_args()
 
