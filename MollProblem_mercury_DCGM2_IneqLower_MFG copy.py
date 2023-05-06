@@ -375,7 +375,7 @@ ax.plot_surface(A, Z, fitted_V.reshape(n_plot, n_plot), cmap='viridis')
 # ax.view_init(35, 35)
 ax.set_xlabel('$a$')
 ax.set_ylabel('$z$')
-ax.set_zlabel('$v(a,z)$')
+# ax.set_zlabel('$v(a,z)$')
 # ax.set_title('Deep Learning Solution')
 
 plt.savefig( './Figure/' +savefolder+ '/' + saveName + '_Value.png',bbox_inches='tight')
